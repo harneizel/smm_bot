@@ -1,8 +1,11 @@
 # Токен телеграм бота
-TG_TOKEN: TOKEN
+TG_TOKEN: 0
 
 # База данных aiosqlite
 DB_FILE: db
 
 # Часовой пояс
 TIMEZONE: Europe/Moscow
+
+#ссыль на канал, бот должен быть админом в канале
+CHANNEL_URL: https://t.me/
