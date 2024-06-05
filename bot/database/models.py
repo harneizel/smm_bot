@@ -17,8 +17,12 @@ class User(Base):
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    tg_id = mapped_column(BigInteger)
-    name: Mapped[str] = mapped_column()
+    tg_id = mapped_column(BigInteger) # айти в тг
+    name: Mapped[str] = mapped_column() # имя в тг
+    username: Mapped[str] = mapped_column() # тг юз
+    sub_type: Mapped[str] = mapped_column() #basic, paid, ban
+    history: Mapped[str] = mapped_column() # история сообщений в диалоге
+    rq_made: Mapped[int] = mapped_column() # кол во сделанных запросов в день
 
 
 

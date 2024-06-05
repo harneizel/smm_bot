@@ -1,32 +1,24 @@
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, insert
 from sqlalchemy.exc import SQLAlchemyError
 
 from bot.database.models import async_session, User
 
 
-async def get_users():
-    async with async_session() as session:
-        result = await session.scalars(select(User))
-        return result
-
-
-async def add_user(user_id: int, **kwargs) -> User:
+async def add_user(tg_id: int, name, username):
     async with async_session() as session:
         try:
-            user = await session.scalar(select(User).where(User.user_id == user_id))
+            user = await session.scalar(select(User).where(User.tg_id == tg_id))
             if not user:
-                user = User(user_id=user_id, **kwargs)
+                user = User(tg_id=tg_id, name=name, username=username, sub_type="basic", history='', rq_made=0)
                 session.add(user)
                 await session.commit()
-            return user
         except SQLAlchemyError as e:
-            await session.rollback()
-            raise e
+            print('e')
 
 
-async def get_user(user_id: int) -> User:
+async def get_user(tg_id: int) -> User:
     async with async_session() as session:
-        result = await session.scalar(select(User).where(User.user_id == user_id))
+        result = await session.scalar(select(User).where(User.tg_id == tg_id))
         return result
 
 
@@ -36,7 +28,12 @@ async def update_user(user_id: int, **kwargs):
         await session.commit()
 
 
-async def delete_user(user_id: int):
+async def delete_user(tg_id: int):
     async with async_session() as session:
-        await session.execute(delete(User).where(User.user_id == user_id))
+        await session.execute(delete(User).where(User.tg_id == tg_id))
+        await session.commit()
+
+async def sub_type_paid(tg_id):
+    async with async_session() as session:
+        await session.execute(update(User).where(User.tg_id == tg_id).values(sub_type="paid"))
         await session.commit()

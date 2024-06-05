@@ -1,8 +1,7 @@
 from aiogram.fsm.state import StatesGroup, State
 
-class NewState(StatesGroup):
-    message = State()
-
+class UserMessages(StatesGroup):
+    to_gpt = State()
 class OneMoreState(StatesGroup):
     something = State()
 

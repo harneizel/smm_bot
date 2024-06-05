@@ -10,3 +10,23 @@ start_inlinekeyboard = types.InlineKeyboardMarkup(
     ],
 )
 
+menu_kb = types.InlineKeyboardMarkup(
+    inline_keyboard=[
+        [types.InlineKeyboardButton(text=text.INLINE_3, callback_data="dialogue")],
+         [types.InlineKeyboardButton(text=text.INLINE_4, callback_data="profile")],
+    ],
+)
+
+back = types.InlineKeyboardMarkup(
+    inline_keyboard=[
+        [types.InlineKeyboardButton(text=text.INLINE_5, callback_data="new_dialogue")],
+         [types.InlineKeyboardButton(text=text.INLINE_6, callback_data="back")],
+    ],
+)
+
+profile = types.InlineKeyboardMarkup(
+    inline_keyboard=[
+        [types.InlineKeyboardButton(text=text.INLINE_7, callback_data="bye_sub")],
+         [types.InlineKeyboardButton(text=text.INLINE_6, callback_data="back")],
+    ],
+)
