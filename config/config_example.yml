@@ -1,5 +1,11 @@
 # Токен телеграм бота
-TG_TOKEN: 0
+TG_TOKEN: 123
+
+# токен платеги из @FatherBot
+PAYMENTS_TOKEN: 123
+
+# цена подписки в рублях
+PRICE: 300
 
 # База данных aiosqlite
 DB_FILE: db
@@ -9,3 +15,13 @@ TIMEZONE: Europe/Moscow
 
 #ссыль на канал, бот должен быть админом в канале
 CHANNEL_URL: https://t.me/
+
+#лимиты базовой подписки
+BASIC_LIMIT: 1
+
+#лимиты платной подписки
+PAID_LIMIT: 1
+
+#список id администраторов
+ADMIN_IDS: []
+
