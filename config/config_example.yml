@@ -1,0 +1,8 @@
+# Токен телеграм бота
+TG_TOKEN: TOKEN
+
+# База данных aiosqlite
+DB_FILE: db
+
+# Часовой пояс
+TIMEZONE: Europe/Moscow

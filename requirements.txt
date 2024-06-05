@@ -1,0 +1,5 @@
+aiogram
+sqlalchemy
+aiosqlite
+pytz
+PyYAML==6.0.1
