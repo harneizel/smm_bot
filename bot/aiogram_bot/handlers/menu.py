@@ -1,3 +1,5 @@
+import json
+import os
 from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, ContentType
 from aiogram.fsm.context import FSMContext
@@ -9,6 +11,7 @@ import bot.aiogram_bot.markups.inline.menu_kb as inline_kb
 import bot.texts as text
 from bot.aiogram_bot.misc.states import *
 from bot.utils.api_requests import *
+from bot.database import histories
 
 router = Router()
 
@@ -33,7 +36,21 @@ async def dialogue(call: CallbackQuery, bot: Bot, state: FSMContext):
 @router.message(UserMessages.to_gpt)
 async def gpt_answer(message: Message, state: FSMContext):
     print("Текст пользователя: " + message.text)
-    history = (await rq.search_id(message.from_user.id))['history']
+    #user = await rq.search_id(message.from_user.id)
+    if not os.path.exists(f"./bot/database/histories/{message.from_user.id}.json"):
+        os.mknod(f"./bot/database/histories/{message.from_user.id}.json")
+        print("файл создан")
+
+    with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='r', encoding='utf-8') as file:
+        if file.readline() == "":
+            history = []
+        else:
+            file.seek(0)
+            history = json.load(file)
+
+    print(f"Изначальная история: {history}")
+
+    history.append({"role":"user", "content": message.text, "content_type":"text"})
     #response = coze_request(message.from_user.id, message.text, history)
     response = {"messages": [{"role": "assistant", "type": "verbose",
                               "content": "{\"msg_type\":\"time_capsule_recall\",\"data\":\"{\\\"wraped_text\\\":\\\"\\\",\\\"origin_search_results\\\":\\\"[]\\\"}\",\"from_module\":null,\"from_unit\":null}",
@@ -43,10 +60,16 @@ async def gpt_answer(message: Message, state: FSMContext):
                              {"role": "assistant", "type": "verbose",
                               "content": "{\"msg_type\":\"generate_answer_finish\",\"data\":\"\",\"from_module\":null,\"from_unit\":null}",
                               "content_type": "text"}], "conversation_id": "123", "code": 0, "msg": "success"}
+    for i in response["messages"]:
+        history.append(i)
+    print(f"История с ответом: {history}")
+    with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='w', encoding='utf-8') as file:
+        json.dump(history, file, ensure_ascii=False, indent=4)
 
-    await message.answer(response, reply_markup=inline_kb.end_chat)
+    #await rq.set_history(message.from_user.id, history_string)
+    await message.answer(response['messages'][1]['content'], reply_markup=inline_kb.end_chat)
     await state.set_state(UserMessages.to_gpt)
-
+    file.close()
     #response = requests.post(url=url, headers=headers, data=json.dumps(data)).text
     #resp_text = json.loads(response)
     #return str(resp_text['messages'][1]['content']).replace('\n\n', '\n')

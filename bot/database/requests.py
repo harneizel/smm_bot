@@ -45,5 +45,11 @@ async def search_us(usernm):
 
 async def search_id(tg_id: int):
     async with async_session() as session:
-        user = await session.scalars(select(User).where(User.tg_id == tg_id))
+        user = await session.scalar(select(User).where(User.tg_id == tg_id))
         return user
+
+# обновляем историю сообщений юзера
+async def set_history(tg_id: int, history):
+    async with async_session as session:
+        await session.execute(update(User).where(User.tg_id == tg_id).values(history=history))
+        await session.commit()

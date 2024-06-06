@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger
+from sqlalchemy import BigInteger, JSON
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -21,7 +21,7 @@ class User(Base):
     name: Mapped[str] = mapped_column() # имя в тг
     username: Mapped[str] = mapped_column() # тг юз
     sub_type: Mapped[str] = mapped_column() #basic, paid, ban
-    history: Mapped[str] = mapped_column() # история сообщений в диалоге
+    history = mapped_column(JSON) # история сообщений в диалоге
     rq_made: Mapped[int] = mapped_column() # кол во сделанных запросов в день
 
 
