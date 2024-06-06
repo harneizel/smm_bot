@@ -33,7 +33,17 @@ async def delete_user(tg_id: int):
         await session.execute(delete(User).where(User.tg_id == tg_id))
         await session.commit()
 
-async def sub_type_paid(tg_id):
+async def sub_type_paid(tg_id: int):
     async with async_session() as session:
         await session.execute(update(User).where(User.tg_id == tg_id).values(sub_type="paid"))
         await session.commit()
+
+async def search_us(usernm):
+    async with async_session() as session:
+        user = await session.scalar(select(User).where(User.username == usernm))
+        return user
+
+async def search_id(tg_id: int):
+    async with async_session() as session:
+        user = await session.scalars(select(User).where(User.tg_id == tg_id))
+        return user

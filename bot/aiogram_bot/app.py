@@ -4,9 +4,9 @@ from aiogram import Dispatcher, Bot, F
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from bot.aiogram_bot.misc.filters import register_filters
-from bot.aiogram_bot.misc.middlewares import register_middlewares
+from bot.aiogram_bot.misc.middlewares.middlewares import *
 from bot.database.models import on_startup_database
-from bot.utils.config import TG_TOKEN
+from bot.utils.config import TG_TOKEN, CHANNEL_ID
 from bot.aiogram_bot.misc.filters.filters import IsAdmin
 from bot.aiogram_bot.handlers.admin import admin_panel
 
@@ -37,6 +37,8 @@ async def aiogram_start():
 
     # register_middlewares(dp)
     #register_filters(dp)
+    dp.update.outer_middleware(SubsriptionMiddleware(bot, channel_id=CHANNEL_ID))
+    #dp.update.outer_middleware(UnsubscribeMiddleware())
 
     register_routers(dp)
     await aiogram_on_startup(bot)

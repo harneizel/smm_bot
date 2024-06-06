@@ -5,9 +5,10 @@ from aiogram.fsm.state import State, StatesGroup
 
 from bot.database import requests as rq
 from bot.utils.config import CHANNEL_ID, PAYMENTS_TOKEN, PRICE, BASIC_LIMIT, PAID_LIMIT
-import bot.aiogram_bot.markups.inline.inline_kb as inline_kb
+import bot.aiogram_bot.markups.inline.menu_kb as inline_kb
 import bot.texts as text
 from bot.aiogram_bot.misc.states import *
+from bot.utils.api_requests import *
 
 router = Router()
 
@@ -15,20 +16,12 @@ router = Router()
 @router.message(F.text == "/start")
 async def start_btn(message: Message, bot: Bot):
     await rq.add_user(message.from_user.id, message.from_user.first_name, message.from_user.username)
-    user_ch_status = await bot.get_chat_member(chat_id=f"@{CHANNEL_ID}", user_id=message.from_user.id)
-    if user_ch_status.status != 'left':
-        await message.answer(text.TEXT_1, reply_markup=inline_kb.menu_kb)
-    else:
-        await message.answer(text=text.START_TEXT, reply_markup=inline_kb.start_inlinekeyboard)
-
+    await message.answer(text.TEXT_1, reply_markup=inline_kb.menu_kb)
 
 @router.callback_query(F.data == "check_sub")
 async def check_sub(call: CallbackQuery, bot: Bot):
-    user_ch_status = await bot.get_chat_member(chat_id=f"@{CHANNEL_ID}", user_id=call.from_user.id)
-    if user_ch_status.status != 'left':
-        await call.message.answer(text.TEXT_1, reply_markup=inline_kb.menu_kb)
-    else:
-        await call.answer(text.TEXT_2)
+    await bot.delete_message(chat_id=call.from_user.id, message_id=call.message.message_id)
+    await call.message.answer(text.TEXT_1, reply_markup=inline_kb.menu_kb)
 
 @router.callback_query(F.data == "dialogue")
 async def dialogue(call: CallbackQuery, bot: Bot, state: FSMContext):
@@ -36,11 +29,21 @@ async def dialogue(call: CallbackQuery, bot: Bot, state: FSMContext):
                                 reply_markup=inline_kb.back)
     await state.set_state(UserMessages.to_gpt)
 
+# обрабатывает диалог с нейронкой
 @router.message(UserMessages.to_gpt)
 async def gpt_answer(message: Message, state: FSMContext):
     print("Текст пользователя: " + message.text)
-    await message.answer('Ответ ChatGPT')
+    history = []
+    response = coze_request(message.from_user.id, message.text, history)
+    await message.answer(response, reply_markup=inline_kb.end_chat)
     await state.set_state(UserMessages.to_gpt)
+
+# завершает чат
+@router.callback_query(F.data == "end_chat")
+async def back(call: CallbackQuery, bot: Bot, state: FSMContext):
+    await state.clear()
+    await call.message.answer(text.TEXT_1, reply_markup=inline_kb.menu_kb)
+
 
 @router.callback_query(F.data == "back")
 async def back(call: CallbackQuery, bot: Bot):
@@ -85,6 +88,7 @@ async def bye_sub(call: CallbackQuery, bot: Bot):
 @router.pre_checkout_query()
 async def pre_checkout_query(pre_checkout: PreCheckoutQuery, bot: Bot):
     await bot.answer_pre_checkout_query(pre_checkout.id, ok=True)
+
 
 @router.message(F.content_type == ContentType.SUCCESSFUL_PAYMENT)
 async def successful_payment(message: Message, bot: Bot):
