@@ -33,10 +33,23 @@ async def dialogue(call: CallbackQuery, bot: Bot, state: FSMContext):
 @router.message(UserMessages.to_gpt)
 async def gpt_answer(message: Message, state: FSMContext):
     print("Текст пользователя: " + message.text)
-    history = []
-    response = coze_request(message.from_user.id, message.text, history)
+    history = (await rq.search_id(message.from_user.id))['history']
+    #response = coze_request(message.from_user.id, message.text, history)
+    response = {"messages": [{"role": "assistant", "type": "verbose",
+                              "content": "{\"msg_type\":\"time_capsule_recall\",\"data\":\"{\\\"wraped_text\\\":\\\"\\\",\\\"origin_search_results\\\":\\\"[]\\\"}\",\"from_module\":null,\"from_unit\":null}",
+                              "content_type": "text"}, {"role": "assistant", "type": "answer",
+                                                        "content": "Окей Тони, смотри как мы можем это сделать. \n\nДля понимания последствий столкновения метеорита с Землей, необходимо учитывать несколько факторов: размер метеорита, его скорость, угол входа в атмосферу, а также плотность и состав метеорита. Вот несколько возможных последствий:\n\n1. **Мелкие метеориты** (до нескольких метров в диаметре):\n   - Такие метеориты обычно сгорают в атмосфере и не достигают поверхности Земли.\n   - В процессе горения они могут создать светящееся явление, известное как \"падающая звезда\" или болид (если метеорит достаточно крупный).\n\n2. **Средние метеориты** (от нескольких метров до десятков метров в диаметре):\n   - Эти метеориты могут частично сгореть в атмосфере и, если все-таки долетят до поверхности, создать кратер.\n   - Могут вызвать локальные разрушения, пожары и воздушные взрывы. \n\n3. **Крупные метеориты** (десятки метров и больше):\n   - Могут вызвать катастрофические изменения, такие как разрушение больших территорий.\n   - Создадут огромные кратеры и вызовут глобальные разрушения, такие как землетрясения, цунами и даже изменение климата вследствие выброса пыли и паров в стратосферу.\n   - Известный пример - Чиксулубский кратер, который, по мнению ученых, вызвал массовое вымирание динозавров около 66 миллионов лет назад.\n\n4. **Сверхкрупные метеориты** (более километра в диаметре):\n   - Эти объекты представляют глобальную угрозу для жизни на Земле. Могут вызвать массовое вымирание видов.\n   - Вызовут долгосрочные изменения климата, такие как \"импактная зима\", в течение которой солнечный свет будет блокирован облаком пыли и золы.\n   - Энергия их удара будет равна или превышать энергию всех ядерных арсеналов Земли.\n\nВот краткая инструкция о том, что может произойти при падении метеорита различных размеров и масс. Если тебе нужно больше информации или конкретные примеры, дай знать!",
+                                                        "content_type": "text"},
+                             {"role": "assistant", "type": "verbose",
+                              "content": "{\"msg_type\":\"generate_answer_finish\",\"data\":\"\",\"from_module\":null,\"from_unit\":null}",
+                              "content_type": "text"}], "conversation_id": "123", "code": 0, "msg": "success"}
+
     await message.answer(response, reply_markup=inline_kb.end_chat)
     await state.set_state(UserMessages.to_gpt)
+
+    #response = requests.post(url=url, headers=headers, data=json.dumps(data)).text
+    #resp_text = json.loads(response)
+    #return str(resp_text['messages'][1]['content']).replace('\n\n', '\n')
 
 # завершает чат
 @router.callback_query(F.data == "end_chat")
