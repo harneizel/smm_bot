@@ -33,6 +33,12 @@ async def delete_user(tg_id: int):
         await session.execute(delete(User).where(User.tg_id == tg_id))
         await session.commit()
 
+async def sub_type_basic(tg_id: int):
+    async with async_session() as session:
+        await session.execute(update(User).where(User.tg_id == tg_id).values(sub_type="basic"))
+        await session.commit()
+
+
 async def sub_type_paid(tg_id: int):
     async with async_session() as session:
         await session.execute(update(User).where(User.tg_id == tg_id).values(sub_type="paid"))
@@ -51,11 +57,6 @@ async def search_id(tg_id: int):
         else:
             return user
 
-# обновляем историю сообщений юзера
-async def set_history(tg_id: int, history):
-    async with async_session() as session:
-        await session.execute(update(User).where(User.tg_id == tg_id).values(history=history))
-        await session.commit()
 
 async def plus_rq_made(tg_id: int):
     async with async_session() as session:

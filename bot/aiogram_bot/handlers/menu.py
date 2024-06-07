@@ -42,7 +42,8 @@ async def dialogue(call: CallbackQuery, bot: Bot, state: FSMContext):
 async def gpt_answer(message: Message, state: FSMContext):
     print("Текст пользователя: " + message.text)
     user = await rq.search_id(message.from_user.id)
-    if (user.sub_type == "basic" and user.rq_made<BASIC_LIMIT) or (user.sub_type =="paid " and user.rq_made<PAID_LIMIT):
+    print(user.sub_type)
+    if (user.sub_type == "paid" and user.rq_made < PAID_LIMIT) or (user.sub_type == "basic" and user.rq_made < BASIC_LIMIT):
         if not os.path.exists(f"./bot/database/histories/{message.from_user.id}.json"):
             os.mknod(f"./bot/database/histories/{message.from_user.id}.json")
             print("файл создан")
@@ -71,9 +72,11 @@ async def gpt_answer(message: Message, state: FSMContext):
         await state.set_state(UserMessages.to_gpt)
 
     elif user.sub_type == "basic" and user.rq_made>=BASIC_LIMIT:
-        await message.answer(text.TEXT_20)
+        await message.answer(text.TEXT_20, reply_markup=inline_kb.end_chat)
+        print("бесплатная подписка, превышены запросы")
     elif user.sub_type == "paid" and user.rq_made>=PAID_LIMIT:
-        await message.answer(text.TEXT_21)
+        await message.answer(text.TEXT_21, reply_markup=inline_kb.end_chat)
+        print("платная подписка, превышены запросы")
 
 # завершает чат
 @router.callback_query(F.data == "end_chat")
@@ -96,9 +99,11 @@ async def back(call: CallbackQuery, bot: Bot):
     if user.sub_type == "basic":
         sub_type = "бесплатная"
         limit = BASIC_LIMIT
+        kb = inline_kb.profile
     elif user.sub_type == "paid":
         sub_type = "платная"
         limit = PAID_LIMIT
+        kb = inline_kb.back_to_menu
     await bot.edit_message_text(text=f"""{call.from_user.first_name}, {text.TEXT_4}\n"""
                                      f"""ID: {call.from_user.id}\n"""
                                      f"""{text.TEXT_5} {sub_type}\n"""
@@ -107,7 +112,7 @@ async def back(call: CallbackQuery, bot: Bot):
                                      f"""{text.TEXT_11} {user.rq_made}/{limit} {text.TEXT_12}\n"""
                                      f"""{text.TEXT_13}""",
                                 chat_id=call.message.chat.id, message_id=call.message.message_id,
-                                reply_markup=inline_kb.profile)
+                                reply_markup=kb)
 
 @router.callback_query(F.data == "bye_sub")
 async def bye_sub(call: CallbackQuery, bot: Bot):

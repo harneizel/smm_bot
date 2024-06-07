@@ -17,25 +17,38 @@ def form_text(user):
     if user.sub_type == "basic":
         sub = "бесплатная"
         limit = BASIC_LIMIT
+        text1 = INLINE_13
+        text2 = INLINE_14
+        cb_1 = f"set_paid_{user.tg_id}"
+        cb_2 = f"ban_user_{user.tg_id}"
     elif user.sub_type == "paid":
-        sub = "платная"
         limit = PAID_LIMIT
+        sub = "платная"
+        text1 = INLINE_18
+        text2 = INLINE_14
+        cb_1 = f"set_basic_{user.tg_id}"
+        cb_2 = f"ban_user_{user.tg_id}"
     elif user.sub_type == "ban":
         sub = "забанен"
         limit = 0
+        text1 = INLINE_19
+        text2 = INLINE_17
+        cb_1 = f"no_data"
+        cb_2 = f"unban_user_{user.tg_id}"
+
     text = f"""Имя: {user.name}\n"""\
            f"""Тг ID: {user.tg_id}\n"""\
            f"""Юзернейм: {user.username}\n"""\
            f"""Подписка: {sub}\n"""\
            f"""Запросов израсходовано: {user.rq_made}/{limit}"""
 
-    return text, sub, limit
+    return text, sub, limit, text1, text2, cb_1, cb_2
 
-def user_kb_builder(user):
+def user_kb_builder(text1, text2, cb_1,cb_2):
     builder = InlineKeyboardBuilder()
     builder.max_width = 1
-    builder.add(types.InlineKeyboardButton(text=text.INLINE_13, callback_data=f"transform_sub_type_{user.tg_id}"),
-                types.InlineKeyboardButton(text=text.INLINE_14, callback_data=f"ban_user_{user.tg_id}"),
+    builder.add(types.InlineKeyboardButton(text=text1, callback_data=cb_1), # подписка
+                types.InlineKeyboardButton(text=text2, callback_data=cb_2), # бан / разбан
                 types.InlineKeyboardButton(text=text.INLINE_12, callback_data=f"back_to_search"))
     return builder
 
@@ -82,9 +95,9 @@ async def get_username(message: Message, state: FSMContext):
     if user == "no_user":
         await message.answer(TEXT_22, reply_markup=adm_back)
     else:
-        us_text, sub, limit = form_text(user)
+        us_text, sub, limit, text1, text2, cb_1, cb_2 = form_text(user)
         await state.clear()
-        builder = user_kb_builder(user)
+        builder = user_kb_builder(text1, text2, cb_1, cb_2)
 
         await message.answer(text=us_text,
                              reply_markup=builder.as_markup())
@@ -95,25 +108,12 @@ async def get_username(message: Message, state: FSMContext):
     if user == "no_user":
         await message.answer(TEXT_22, reply_markup=adm_back)
     else:
-        us_text, sub, limit = form_text(user)
+        us_text, sub, limit, text1, text2, cb_1, cb_2 = form_text(user)
         await state.clear()
-        builder = user_kb_builder(user)
+        builder = user_kb_builder(text1, text2, cb_1, cb_2)
 
         await message.answer(text=us_text,
                              reply_markup=builder.as_markup())
-
-@router.callback_query(F.data[0:8] == "ban_user")
-async def ban_user(call: CallbackQuery, bot: Bot, state: FSMContext):
-    user_id = call.data[9:]
-    print(user_id)
-    await bot.ban_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
-    builder = InlineKeyboardBuilder()
-    builder.max_width = 1
-    builder.add(types.InlineKeyboardButton(text=text.INLINE_16, callback_data=f"back_to_{user_id}"),
-                types.InlineKeyboardButton(text=text.INLINE_17, callback_data=f"unban_user_{user_id}"))
-    await rq.ban_user(int(user_id))
-    await bot.edit_message_text(text=f"{text.TEXT_23}{user_id}", chat_id=call.message.chat.id, message_id=call.message.message_id,
-                                reply_markup=builder.as_markup())
 
 @router.callback_query(F.data[0:7] == "back_to")
 async def ban_user(call: CallbackQuery, bot: Bot, state: FSMContext):
@@ -123,12 +123,57 @@ async def ban_user(call: CallbackQuery, bot: Bot, state: FSMContext):
         await bot.edit_message_text(text=TEXT_22, chat_id=call.message.chat.id, message_id=call.message.message_id,
                                     reply_markup=adm_back)
     else:
-        us_text, sub, limit = form_text(user)
+        us_text, sub, limit, text1, text2, cb_1, cb_2 = form_text(user)
         await state.clear()
-        builder = user_kb_builder(user)
+        builder = user_kb_builder(text1, text2, cb_1, cb_2)
         await bot.edit_message_text(text=us_text, chat_id=call.message.chat.id, message_id=call.message.message_id,
                                     reply_markup=builder.as_markup())
 
-@router.callback_query(F.data[0:8] == "unban_user")
+@router.callback_query(F.data[0:9] == "set_basic")
 async def ban_user(call: CallbackQuery, bot: Bot, state: FSMContext):
-    pass
+    user_id = call.data[10:]
+    print(f"Установка бесплатной подписки для {user_id}")
+    await rq.sub_type_basic(user_id)
+    builder = InlineKeyboardBuilder()
+    builder.max_width = 1
+    builder.add(types.InlineKeyboardButton(text=text.INLINE_16, callback_data=f"back_to_{user_id}"))
+    await bot.edit_message_text(text=f"{text.TEXT_24}{user_id}", chat_id=call.message.chat.id, message_id=call.message.message_id,
+                                reply_markup=builder.as_markup())
+
+@router.callback_query(F.data[0:8] == "set_paid")
+async def ban_user(call: CallbackQuery, bot: Bot, state: FSMContext):
+    user_id = call.data[9:]
+    print(f"Установка платной подписки для {user_id}")
+    await rq.sub_type_paid(user_id)
+    builder = InlineKeyboardBuilder()
+    builder.max_width = 1
+    builder.add(types.InlineKeyboardButton(text=text.INLINE_16, callback_data=f"back_to_{user_id}"))
+    await bot.edit_message_text(text=f"{text.TEXT_25}{user_id}", chat_id=call.message.chat.id, message_id=call.message.message_id,
+                                reply_markup=builder.as_markup())
+
+
+@router.callback_query(F.data[0:8] == "ban_user")
+async def ban_user(call: CallbackQuery, bot: Bot, state: FSMContext):
+    user_id = call.data[9:]
+    print(f"Бан для {user_id}")
+    await bot.ban_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
+    builder = InlineKeyboardBuilder()
+    builder.max_width = 1
+    builder.add(types.InlineKeyboardButton(text=text.INLINE_16, callback_data=f"back_to_{user_id}"))
+    await rq.ban_user(int(user_id))
+    await bot.edit_message_text(text=f"{text.TEXT_23}{user_id}", chat_id=call.message.chat.id, message_id=call.message.message_id,
+                                reply_markup=builder.as_markup())
+
+
+@router.callback_query(F.data[0:10] == "unban_user")
+async def ban_user(call: CallbackQuery, bot: Bot, state: FSMContext):
+    user_id = call.data[11:]
+    print(f"Разабан для {user_id}")
+    await bot.unban_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
+    builder = InlineKeyboardBuilder()
+    builder.max_width = 1
+    builder.add(types.InlineKeyboardButton(text=text.INLINE_16, callback_data=f"back_to_{user_id}"))
+    await rq.sub_type_basic(int(user_id))
+    await bot.edit_message_text(text=f"{text.TEXT_26}{user_id}", chat_id=call.message.chat.id,
+                                message_id=call.message.message_id,
+                                reply_markup=builder.as_markup())

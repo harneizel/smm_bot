@@ -31,6 +31,14 @@ profile = types.InlineKeyboardMarkup(
     ],
 )
 
+back_to_menu = types.InlineKeyboardMarkup(
+    inline_keyboard=[
+        [types.InlineKeyboardButton(text=text.INLINE_6, callback_data="back")]
+    ],
+)
+
+
+
 end_chat = types.InlineKeyboardMarkup(
     inline_keyboard=[
         [types.InlineKeyboardButton(text=text.INLINE_15, callback_data="end_chat")]

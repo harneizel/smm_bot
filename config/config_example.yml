@@ -13,15 +13,26 @@ DB_FILE: db
 # Часовой пояс
 TIMEZONE: Europe/Moscow
 
-#ссыль на канал, бот должен быть админом в канале
+# ссыль на канал, бот должен быть админом в канале
 CHANNEL_URL: https://t.me/
 
-#лимиты базовой подписки
-BASIC_LIMIT: 1
+# id канала выше
+CHANNEL_ID: -123
 
-#лимиты платной подписки
-PAID_LIMIT: 1
+# лимиты базовой подписки
+BASIC_LIMIT: 5
 
-#список id администраторов
+# лимиты платной подписки
+PAID_LIMIT: 15
+
+# id администраторов
 ADMIN_IDS: []
 
+# адрес coze
+COZE_URL: https://api.coze.com/open_api/v2/chat
+
+# coze api token
+COZE_TOKEN: abc
+
+# coze bot id
+COZE_BOT_ID: 123
