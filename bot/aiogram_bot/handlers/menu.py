@@ -11,7 +11,7 @@ import bot.aiogram_bot.markups.inline.menu_kb as inline_kb
 import bot.texts as text
 from bot.aiogram_bot.misc.states import *
 from bot.utils.api_requests import *
-from bot.database import histories
+
 
 router = Router()
 
@@ -28,45 +28,52 @@ async def check_sub(call: CallbackQuery, bot: Bot):
 
 @router.callback_query(F.data == "dialogue")
 async def dialogue(call: CallbackQuery, bot: Bot, state: FSMContext):
+    if not os.path.exists(f"./bot/database/histories/{call.from_user.id}.json"):
+        os.mknod(f"./bot/database/histories/{call.from_user.id}.json")
+        print("файл создан")
+    with open(file=f"./bot/database/histories/{str(call.from_user.id)}.json", mode='w', encoding='utf-8') as file:
+        pass
     await bot.edit_message_text(text=text.TEXT_3, chat_id=call.message.chat.id, message_id=call.message.message_id,
-                                reply_markup=inline_kb.back)
+                                reply_markup=inline_kb.end_chat)
     await state.set_state(UserMessages.to_gpt)
 
 # обрабатывает диалог с нейронкой
 @router.message(UserMessages.to_gpt)
 async def gpt_answer(message: Message, state: FSMContext):
     print("Текст пользователя: " + message.text)
-    #user = await rq.search_id(message.from_user.id)
-    if not os.path.exists(f"./bot/database/histories/{message.from_user.id}.json"):
-        os.mknod(f"./bot/database/histories/{message.from_user.id}.json")
-        print("файл создан")
+    user = await rq.search_id(message.from_user.id)
+    if (user.sub_type == "basic" and user.rq_made<BASIC_LIMIT) or (user.sub_type =="paid " and user.rq_made<PAID_LIMIT):
+        if not os.path.exists(f"./bot/database/histories/{message.from_user.id}.json"):
+            os.mknod(f"./bot/database/histories/{message.from_user.id}.json")
+            print("файл создан")
+        #созадние истории json если ее нет и забирание того что там
+        with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='r', encoding='utf-8') as file:
+            if file.readline() == "":
+                history = []
+            else:
+                file.seek(0)
+                history = json.load(file)
 
-    with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='r', encoding='utf-8') as file:
-        if file.readline() == "":
-            history = []
-        else:
-            file.seek(0)
-            history = json.load(file)
+        print(f"Изначальная история: {history}")
 
-    print(f"Изначальная история: {history}")
+        history.append({"role":"user", "content": message.text, "content_type":"text"})
+        response = coze_request(str(message.from_user.id), message.text, history)
 
-    history.append({"role":"user", "content": message.text, "content_type":"text"})
-    response = coze_request(str(message.from_user.id), message.text, history)
+        for i in response:
+            history.append(i)
+        print(f"История с ответом: {history}")
+        with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='w', encoding='utf-8') as file:
+            json.dump(history, file, ensure_ascii=False, indent=4)
+            print("файл записан")
 
-    for i in response:
-        history.append(i)
-    print(f"История с ответом: {history}")
-    with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='w', encoding='utf-8') as file:
-        json.dump(history, file, ensure_ascii=False, indent=4)
-        print("файл записан")
+        await message.answer(response[1]['content'], reply_markup=inline_kb.end_chat)
+        await rq.plus_rq_made(message.from_user.id)
+        await state.set_state(UserMessages.to_gpt)
 
-    #await rq.set_history(message.from_user.id, history_string)
-    await message.answer(response[1]['content'], reply_markup=inline_kb.end_chat)
-    await state.set_state(UserMessages.to_gpt)
-    file.close()
-    #response = requests.post(url=url, headers=headers, data=json.dumps(data)).text
-    #resp_text = json.loads(response)
-    #return str(resp_text['messages'][1]['content']).replace('\n\n', '\n')
+    elif user.sub_type == "basic" and user.rq_made>=BASIC_LIMIT:
+        await message.answer(text.TEXT_20)
+    elif user.sub_type == "paid" and user.rq_made>=PAID_LIMIT:
+        await message.answer(text.TEXT_21)
 
 # завершает чат
 @router.callback_query(F.data == "end_chat")
