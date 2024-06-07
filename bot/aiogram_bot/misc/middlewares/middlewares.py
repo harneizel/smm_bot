@@ -55,7 +55,7 @@ class SubsriptionMiddleware(BaseMiddleware):
                 if member.status in [mbStatus.MEMBER, mbStatus.CREATOR, mbStatus.ADMINISTRATOR]:
                     return await handler(event, data)
                 else:
-                    await event.message.answer(text=START_TEXT, reply_markup=start_inlinekeyboard)
+                    await event.callback_query.message.answer(text=START_TEXT, reply_markup=start_inlinekeyboard)
             except TelegramBadRequest:
                 await event.message.answer(TEXT_14)
         else:
