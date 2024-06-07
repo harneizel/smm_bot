@@ -32,13 +32,13 @@ def register_routers(dp: Dispatcher):
 
 
 async def aiogram_start():
-    bot = Bot(token=TG_TOKEN)
+    bot = Bot(token=TG_TOKEN, encoding="utf-8")
     dp = Dispatcher(storage=MemoryStorage())
 
     # register_middlewares(dp)
     #register_filters(dp)
 
-    #dp.update.outer_middleware(SubsriptionMiddleware(bot, channel_id=CHANNEL_ID))
+    dp.update.outer_middleware(SubsriptionMiddleware(bot, channel_id=CHANNEL_ID))
 
     #dp.update.outer_middleware(UnsubscribeMiddleware())
 

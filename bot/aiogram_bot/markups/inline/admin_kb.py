@@ -29,7 +29,6 @@ user_actions = types.InlineKeyboardMarkup(
     inline_keyboard=[
         [types.InlineKeyboardButton(text=text.INLINE_13, callback_data="transform_sub_type"),
         types.InlineKeyboardButton(text=text.INLINE_14, callback_data="ban_user")],
-
         [types.InlineKeyboardButton(text=text.INLINE_12, callback_data="back_to_search")]
     ],
 )

@@ -9,7 +9,7 @@ async def add_user(tg_id: int, name, username):
         try:
             user = await session.scalar(select(User).where(User.tg_id == tg_id))
             if not user:
-                user = User(tg_id=tg_id, name=name, username=username, sub_type="basic", history='', rq_made=0)
+                user = User(tg_id=tg_id, name=name, username=username, sub_type="basic", rq_made=0)
                 session.add(user)
                 await session.commit()
         except SQLAlchemyError as e:
@@ -46,10 +46,27 @@ async def search_us(usernm):
 async def search_id(tg_id: int):
     async with async_session() as session:
         user = await session.scalar(select(User).where(User.tg_id == tg_id))
-        return user
+        if not user:
+            return "no_user"
+        else:
+            return user
 
 # обновляем историю сообщений юзера
 async def set_history(tg_id: int, history):
-    async with async_session as session:
+    async with async_session() as session:
         await session.execute(update(User).where(User.tg_id == tg_id).values(history=history))
+        await session.commit()
+
+async def plus_rq_made(tg_id: int):
+    async with async_session() as session:
+        result = await session.scalar(select(User).where(User.tg_id == tg_id))
+        rq_made = result.rq_made
+        rq_made +=1
+        print(f"user: {tg_id} requests: {rq_made}")
+        await session.execute(update(User).where(User.tg_id==tg_id).values(rq_made=rq_made))
+        await session.commit()
+
+async def ban_user(tg_id: int):
+    async with async_session() as session:
+        await session.execute(update(User).where(User.tg_id == tg_id).values(sub_type="ban"))
         await session.commit()
