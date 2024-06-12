@@ -10,7 +10,7 @@ from bot.utils.config import CHANNEL_ID, PAYMENTS_TOKEN, PRICE, BASIC_LIMIT, PAI
 import bot.aiogram_bot.markups.inline.menu_kb as inline_kb
 import bot.texts as text
 from bot.aiogram_bot.misc.states import *
-from bot.utils.api_requests import *
+from bot.utils.coze_requests import *
 
 
 router = Router()
@@ -74,7 +74,7 @@ async def gpt_answer(message: Message, state: FSMContext):
             json.dump(history, file, ensure_ascii=False, indent=4)
             print("файл записан")
 
-        await message.answer(response[1]['content'], reply_markup=inline_kb.end_chat)
+        await message.answer(response[0]['content'], reply_markup=inline_kb.end_chat)
         await rq.plus_rq_made(message.from_user.id)
         await state.set_state(UserMessages.to_gpt)
 

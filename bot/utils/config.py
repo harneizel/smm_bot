@@ -21,5 +21,6 @@ ADMIN_IDS = config['ADMIN_IDS']
 COZE_URL = config['COZE_URL']
 COZE_TOKEN = config['COZE_TOKEN']
 COZE_BOT_ID = config['COZE_BOT_ID']
+DG_API_KEY = config['DG_API_KEY']
 
 SQLALCHEMY_URL = "sqlite+aiosqlite:///db.sqlite3"

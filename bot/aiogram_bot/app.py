@@ -39,6 +39,7 @@ async def aiogram_start():
     # register_middlewares(dp)
     #register_filters(dp)
 
+    #
     dp.update.outer_middleware(SubsriptionMiddleware(bot, channel_id=CHANNEL_ID))
 
     #dp.update.outer_middleware(UnsubscribeMiddleware())
