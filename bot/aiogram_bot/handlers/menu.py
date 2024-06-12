@@ -21,10 +21,17 @@ async def start_btn(message: Message, bot: Bot):
     await rq.add_user(message.from_user.id, message.from_user.first_name, message.from_user.username)
     await message.answer(text.TEXT_1, reply_markup=inline_kb.menu_kb)
 
+# кнопка я подписался
 @router.callback_query(F.data == "check_sub")
 async def check_sub(call: CallbackQuery, bot: Bot):
+    #await rq.add_user(call.from_user.id, call.from_user.first_name, call.from_user.username)
     await bot.delete_message(chat_id=call.from_user.id, message_id=call.message.message_id)
     await call.message.answer(text.TEXT_1, reply_markup=inline_kb.menu_kb)
+
+@router.callback_query(F.data == "agree")
+async def check_sub(call: CallbackQuery, bot: Bot):
+    await bot.delete_message(chat_id=call.from_user.id, message_id=call.message.message_id)
+    await call.message.answer(text=text.START_TEXT, reply_markup=inline_kb.start_inlinekeyboard)
 
 @router.callback_query(F.data == "dialogue")
 async def dialogue(call: CallbackQuery, bot: Bot, state: FSMContext):

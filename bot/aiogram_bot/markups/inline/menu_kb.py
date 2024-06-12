@@ -37,10 +37,14 @@ back_to_menu = types.InlineKeyboardMarkup(
     ],
 )
 
-
-
 end_chat = types.InlineKeyboardMarkup(
     inline_keyboard=[
         [types.InlineKeyboardButton(text=text.INLINE_15, callback_data="end_chat")]
+    ],
+)
+
+rules_approval = types.InlineKeyboardMarkup(
+    inline_keyboard=[
+        [types.InlineKeyboardButton(text=text.INLINE_20, callback_data="agree")]
     ],
 )

@@ -2,6 +2,7 @@ import logging
 
 from aiogram import Dispatcher, Bot, F
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.client.default import DefaultBotProperties
 
 from bot.aiogram_bot.misc.filters import register_filters
 from bot.aiogram_bot.misc.middlewares.middlewares import *
@@ -32,7 +33,7 @@ def register_routers(dp: Dispatcher):
 
 
 async def aiogram_start():
-    bot = Bot(token=TG_TOKEN, encoding="utf-8")
+    bot = Bot(token=TG_TOKEN, default=DefaultBotProperties(parse_mode='Markdown'))
     dp = Dispatcher(storage=MemoryStorage())
 
     # register_middlewares(dp)

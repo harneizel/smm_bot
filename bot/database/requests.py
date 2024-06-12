@@ -13,8 +13,19 @@ async def add_user(tg_id: int, name, username):
                 session.add(user)
                 await session.commit()
         except SQLAlchemyError as e:
-            print('e')
+            print('error')
 
+# проверяет есть ли пользоватлеь в бд
+async def is_user(tg_id: int):
+    async with async_session() as session:
+        try:
+            user = await session.scalar(select(User).where(User.tg_id == tg_id))
+            if not user:
+                return "not_user"
+            else:
+                return "is_user"
+        except SQLAlchemyError as e:
+            print('error')
 
 async def get_user(tg_id: int) -> User:
     async with async_session() as session:
@@ -24,7 +35,7 @@ async def get_user(tg_id: int) -> User:
 
 async def update_user(user_id: int, **kwargs):
     async with async_session() as session:
-        await session.execute(update(User).where(User.user_id == user_id).values(**kwargs))
+        await session.execute(update(User).where(User.tg_id == user_id).values(**kwargs))
         await session.commit()
 
 
