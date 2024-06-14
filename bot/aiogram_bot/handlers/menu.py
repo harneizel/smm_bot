@@ -15,11 +15,12 @@ from bot.utils.coze_requests import *
 
 router = Router()
 
-
+# главное меню
 @router.message(F.text == "/start")
 async def start_btn(message: Message, bot: Bot):
     await rq.add_user(message.from_user.id, message.from_user.first_name, message.from_user.username)
     await message.answer(text.TEXT_1, reply_markup=inline_kb.menu_kb)
+
 
 # кнопка я подписался
 @router.callback_query(F.data == "check_sub")
@@ -28,11 +29,13 @@ async def check_sub(call: CallbackQuery, bot: Bot):
     await bot.delete_message(chat_id=call.from_user.id, message_id=call.message.message_id)
     await call.message.answer(text.TEXT_1, reply_markup=inline_kb.menu_kb)
 
+# согласие с правилами
 @router.callback_query(F.data == "agree")
 async def check_sub(call: CallbackQuery, bot: Bot):
     await bot.delete_message(chat_id=call.from_user.id, message_id=call.message.message_id)
     await call.message.answer(text=text.START_TEXT, reply_markup=inline_kb.start_inlinekeyboard)
 
+# начало диалога с gpt
 @router.callback_query(F.data == "dialogue")
 async def dialogue(call: CallbackQuery, bot: Bot, state: FSMContext):
     if not os.path.exists(f"./bot/database/histories/{call.from_user.id}.json"):
@@ -50,7 +53,7 @@ async def gpt_answer(message: Message, state: FSMContext):
     print("Текст пользователя: " + message.text)
     user = await rq.search_id(message.from_user.id)
     print(user.sub_type)
-    if (user.sub_type == "paid" and user.rq_made < PAID_LIMIT) or (user.sub_type == "basic" and user.rq_made < BASIC_LIMIT):
+    if (user.sub_type == "paid" and user.rq_made < PAID_LIMIT) or (user.sub_type == "basic" and user.rq_made < BASIC_LIMIT): # проверяет достаточно ли запросов у юзера
         if not os.path.exists(f"./bot/database/histories/{message.from_user.id}.json"):
             os.mknod(f"./bot/database/histories/{message.from_user.id}.json")
             print("файл создан")
@@ -93,13 +96,13 @@ async def back(call: CallbackQuery, bot: Bot, state: FSMContext):
         pass
     await call.message.answer(text.TEXT_1, reply_markup=inline_kb.menu_kb)
 
-
+# назад в меню
 @router.callback_query(F.data == "back")
 async def back(call: CallbackQuery, bot: Bot):
     await bot.edit_message_text(text=text.TEXT_1, chat_id=call.message.chat.id, message_id=call.message.message_id,
                                 reply_markup=inline_kb.menu_kb)
 
-
+# профиль юзера
 @router.callback_query(F.data == "profile")
 async def back(call: CallbackQuery, bot: Bot):
     user = await rq.get_user(call.from_user.id)
@@ -121,6 +124,7 @@ async def back(call: CallbackQuery, bot: Bot):
                                 chat_id=call.message.chat.id, message_id=call.message.message_id,
                                 reply_markup=kb)
 
+# возов кнопки оплаты подписки
 @router.callback_query(F.data == "bye_sub")
 async def bye_sub(call: CallbackQuery, bot: Bot):
     await bot.edit_message_text(text=text.TEXT_6, chat_id=call.message.chat.id, message_id=call.message.message_id)
@@ -140,7 +144,7 @@ async def bye_sub(call: CallbackQuery, bot: Bot):
 async def pre_checkout_query(pre_checkout: PreCheckoutQuery, bot: Bot):
     await bot.answer_pre_checkout_query(pre_checkout.id, ok=True)
 
-
+# если платеж прошел
 @router.message(F.content_type == ContentType.SUCCESSFUL_PAYMENT)
 async def successful_payment(message: Message, bot: Bot):
     await rq.sub_type_paid(message.from_user.id)

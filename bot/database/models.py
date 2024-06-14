@@ -21,7 +21,6 @@ class User(Base):
     name: Mapped[str] = mapped_column() # имя в тг
     username: Mapped[str] = mapped_column() # тг юз
     sub_type: Mapped[str] = mapped_column() #basic, paid, ban
-
     rq_made: Mapped[int] = mapped_column() # кол во сделанных запросов в день
 
 

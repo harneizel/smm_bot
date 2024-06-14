@@ -48,3 +48,9 @@ rules_approval = types.InlineKeyboardMarkup(
         [types.InlineKeyboardButton(text=text.INLINE_20, callback_data="agree")]
     ],
 )
+
+web_app =  types.InlineKeyboardMarkup(
+    inline_keyboard=[
+        [types.InlineKeyboardButton(text='Запустить веб приложение', web_app=types.web_app_info.WebAppInfo(url=''))]
+    ],
+)

@@ -1,5 +1,6 @@
 aiogram
 sqlalchemy
 aiosqlite
+requests
+aio_scheduler
 pytz
-PyYAML==6.0.1
