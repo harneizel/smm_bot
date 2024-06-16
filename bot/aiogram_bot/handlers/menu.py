@@ -124,7 +124,7 @@ async def back(call: CallbackQuery, bot: Bot):
                                 chat_id=call.message.chat.id, message_id=call.message.message_id,
                                 reply_markup=kb)
 
-# возов кнопки оплаты подписки
+# вызов кнопки оплаты подписки
 @router.callback_query(F.data == "bye_sub")
 async def bye_sub(call: CallbackQuery, bot: Bot):
     await bot.edit_message_text(text=text.TEXT_6, chat_id=call.message.chat.id, message_id=call.message.message_id)
@@ -163,4 +163,4 @@ async def successful_payment(message: Message, bot: Bot):
                                      f"""{text.TEXT_10}\n"""
                                      f"""{text.TEXT_11} {user.rq_made}/{limit} {text.TEXT_12}\n"""
                                      f"""{text.TEXT_13}""",
-                                reply_markup=inline_kb.profile)
+                                reply_markup=inline_kb.back_to_menu)

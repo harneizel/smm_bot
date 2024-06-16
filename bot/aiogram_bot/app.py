@@ -3,6 +3,7 @@ import logging
 from aiogram import Dispatcher, Bot, F
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.client.default import DefaultBotProperties
+from aiogram.methods import DeleteWebhook
 
 from bot.aiogram_bot.misc.filters import register_filters
 from bot.aiogram_bot.misc.middlewares.middlewares import *
@@ -39,11 +40,13 @@ async def aiogram_start():
     # register_middlewares(dp)
     #register_filters(dp)
 
-    #
+
     dp.update.outer_middleware(SubsriptionMiddleware(bot, channel_id=CHANNEL_ID))
 
     #dp.update.outer_middleware(UnsubscribeMiddleware())
 
     register_routers(dp)
     await aiogram_on_startup(bot)
+    await bot(DeleteWebhook(drop_pending_updates=True))
+    await bot.delete_webhook()
     await dp.start_polling(bot)

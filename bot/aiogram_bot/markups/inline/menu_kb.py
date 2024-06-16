@@ -5,7 +5,7 @@ from bot.utils.config import CHANNEL_URL as url
 
 start_inlinekeyboard = types.InlineKeyboardMarkup(
     inline_keyboard=[
-        [types.InlineKeyboardButton(text=text.INLINE_1, url=url)],
+         [types.InlineKeyboardButton(text=text.INLINE_1, url=url)],
          [types.InlineKeyboardButton(text=text.INLINE_2, callback_data="check_sub")],
     ],
 )
@@ -13,9 +13,10 @@ start_inlinekeyboard = types.InlineKeyboardMarkup(
 menu_kb = types.InlineKeyboardMarkup(
     inline_keyboard=[
         [types.InlineKeyboardButton(text=text.INLINE_3, callback_data="dialogue")],
-         [types.InlineKeyboardButton(text=text.INLINE_4, callback_data="profile")],
+        [types.InlineKeyboardButton(text=text.INLINE_4, callback_data="profile")]
+       # [types.InlineKeyboardButton(text="Web app", web_app=types.WebAppInfo(url='https://harneizel.github.io/webapp.github.io/'))] # пока не доделано
     ],
-)
+) # https://harneizel.github.io/webapp.github.io/
 
 back = types.InlineKeyboardMarkup(
     inline_keyboard=[
