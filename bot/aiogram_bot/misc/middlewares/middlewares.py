@@ -1,5 +1,5 @@
 from aiogram import BaseMiddleware, Bot
-from aiogram.types import Update, ChatMemberUpdated, ChatMember
+from aiogram.types import Update, Message
 from aiogram.enums.chat_member_status import ChatMemberStatus as mbStatus
 from aiogram.enums.chat_type import ChatType
 from aiogram.exceptions import TelegramBadRequest
@@ -18,7 +18,7 @@ class SubsriptionMiddleware(BaseMiddleware):
 
     async def __call__(self, handler, event: Update, data: dict):
         print(event)
-        if event.message:
+        if event.message and event.message.chat.type=="private":
             user_id = event.message.from_user.id
             print(f"Юзер ID: {user_id}")
             #try:
@@ -43,7 +43,7 @@ class SubsriptionMiddleware(BaseMiddleware):
                 return await handler(event, data)
             else:
                 await event.message.answer(text=START_TEXT, reply_markup=start_inlinekeyboard)
-        elif event.callback_query:
+        elif event.callback_query and event.callback_query.message.chat.type == "private":
             user_id = event.callback_query.from_user.id
             #try:
             member = await self.bot.get_chat_member(self.channel_id, user_id)

@@ -1,11 +1,24 @@
-# Токен телеграм бота
-TG_TOKEN: 123
+# id администраторов
+ADMIN_IDS: []
 
-# токен платеги из @FatherBot
-PAYMENTS_TOKEN: 123
+# Токен телеграм бота
+TG_TOKEN: 123:abc  #рабочий abc
+                                                          #тестовый abc
+# токен платеги из BotFather
+PAYMENTS_TOKEN: 123  #рабочий 123
+                                      #тестовый 123
+
+# coze api token
+COZE_TOKEN: abc
+
+# coze bot id
+COZE_BOT_ID: 123
+
+#deepgram api key
+DG_API_KEY: abc
 
 # цена подписки в рублях
-PRICE: 300
+PRICE: 500
 
 # База данных aiosqlite
 DB_FILE: db
@@ -13,26 +26,20 @@ DB_FILE: db
 # Часовой пояс
 TIMEZONE: Europe/Moscow
 
-# ссыль на канал, бот должен быть админом в канале
-CHANNEL_URL: https://t.me/
+# ссыль на канал/группу, бот должен быть админом в канале или участником в группе
+CHANNEL_URL: https://t.me/abc #рабочий https://abc
+                                            #тестовый https://t.me/abc
 
-# id канала выше
-CHANNEL_ID: -123
+# id канала/группы
+CHANNEL_ID: -100123  #рабочий -100123
+                            #тестовый -100123
 
 # лимиты базовой подписки
 BASIC_LIMIT: 5
 
 # лимиты платной подписки
-PAID_LIMIT: 15
-
-# id администраторов
-ADMIN_IDS: []
+PAID_LIMIT: 20
 
 # адрес coze
 COZE_URL: https://api.coze.com/open_api/v2/chat
 
-# coze api token
-COZE_TOKEN: abc
-
-# coze bot id
-COZE_BOT_ID: 123

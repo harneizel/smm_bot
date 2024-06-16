@@ -59,9 +59,9 @@ async def admin_panel(message: Message, bot: Bot):
 
 # поиск пользователей
 @router.callback_query(F.data == "search_user")
-async def search_user(call: CallbackQuery, bot: Bot, state: FSMContext):
-    await bot.edit_message_text(text=text.TEXT_17, chat_id=call.message.chat.id, message_id=call.message.message_id,
-                                reply_markup=search)
+async def search_user(call: CallbackQuery, bot: Bot):
+    await call.message.answer(text = text.TEXT_17)
+    await bot.edit_message_text(text=text.TEXT_17, chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=search)
 
 @router.callback_query(F.data=="back_to_search")
 async def back_to_search(call: CallbackQuery, bot: Bot, state: FSMContext):
@@ -78,8 +78,7 @@ async def sadm_back(call: CallbackQuery, bot: Bot, state: FSMContext):
 # поиск пользователей по юзернейму
 @router.callback_query(F.data == "search_us")
 async def sadm_back(call: CallbackQuery, bot: Bot, state: FSMContext):
-    await bot.edit_message_text(text=text.TEXT_18, chat_id=call.message.chat.id, message_id=call.message.message_id,
-                                reply_markup=adm_back)
+    await bot.edit_message_text(text=text.TEXT_18, chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=adm_back)
     await state.set_state(AdminState.username)
 
 # поиск пользователей по id
@@ -111,7 +110,6 @@ async def get_username(message: Message, state: FSMContext):
         us_text, sub, limit, text1, text2, cb_1, cb_2 = form_text(user)
         await state.clear()
         builder = user_kb_builder(text1, text2, cb_1, cb_2)
-
         await message.answer(text=us_text,
                              reply_markup=builder.as_markup())
 
