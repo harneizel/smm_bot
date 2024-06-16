@@ -60,7 +60,6 @@ async def admin_panel(message: Message, bot: Bot):
 # поиск пользователей
 @router.callback_query(F.data == "search_user")
 async def search_user(call: CallbackQuery, bot: Bot):
-    await call.message.answer(text = text.TEXT_17)
     await bot.edit_message_text(text=text.TEXT_17, chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=search)
 
 @router.callback_query(F.data=="back_to_search")
