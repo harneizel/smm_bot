@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 from aiogram import Router, F, Bot
@@ -14,6 +15,15 @@ from bot.utils.coze_requests import *
 
 
 router = Router()
+
+async def send_typing_action(chat_id, bot):
+    try:
+        while True:
+            await bot.send_chat_action(chat_id, "typing")
+            await asyncio.sleep(4)
+    except asyncio.CancelledError:
+        pass
+
 
 # главное меню
 @router.message(F.text == "/start")
@@ -49,7 +59,9 @@ async def dialogue(call: CallbackQuery, bot: Bot, state: FSMContext):
 
 # обрабатывает диалог с нейронкой
 @router.message(UserMessages.to_gpt)
-async def gpt_answer(message: Message, state: FSMContext):
+async def gpt_answer(message: Message, state: FSMContext, bot: Bot):
+    typing_task = asyncio.create_task(send_typing_action(message.from_user.id, bot))
+    await bot.send_chat_action(message.from_user.id, "typing")
     print("Текст пользователя: " + message.text)
     user = await rq.search_id(message.from_user.id)
     print(user.sub_type)
@@ -57,7 +69,7 @@ async def gpt_answer(message: Message, state: FSMContext):
         if not os.path.exists(f"./bot/database/histories/{message.from_user.id}.json"):
             os.mknod(f"./bot/database/histories/{message.from_user.id}.json")
             print("файл создан")
-        #созадние истории json если ее нет и забирание того что там
+        #создание истории json если ее нет и забирание того что там
         with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='r', encoding='utf-8') as file:
             if file.readline() == "":
                 history = []
@@ -68,7 +80,12 @@ async def gpt_answer(message: Message, state: FSMContext):
         print(f"Изначальная история: {history}")
 
         history.append({"role":"user", "content": message.text, "content_type":"text"})
-        response = coze_request(str(message.from_user.id), message.text, history)
+
+        try:
+            response = await coze_request(str(message.from_user.id), message.text, history)
+        finally:
+            typing_task.cancel()
+            await typing_task
 
         for i in response:
             history.append(i)
@@ -87,6 +104,9 @@ async def gpt_answer(message: Message, state: FSMContext):
     elif user.sub_type == "paid" and user.rq_made>=PAID_LIMIT:
         await message.answer(text.TEXT_21, reply_markup=inline_kb.end_chat)
         print("платная подписка, превышены запросы")
+
+
+
 
 # завершает чат
 @router.callback_query(F.data == "end_chat")
