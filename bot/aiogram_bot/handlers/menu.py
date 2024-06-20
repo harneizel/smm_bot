@@ -24,12 +24,12 @@ async def send_typing_action(chat_id, bot):
     except asyncio.CancelledError:
         pass
 
-def payments_button(tg_id, builder):
+async def payments_button(tg_id, builder):
     price, mrh_login, pass_1, desc = PRICE, MRH_LOGIN, PASS_1, DESCRIPTION
-
-    crc = hashlib.md5(f"{mrh_login}:{price}:{tg_id}:{pass_1}".encode('utf-8')).hexdigest() #hashlib.md5(f"{mrh_login}:{price}:{tg_id}:{pass_1}")
-    print(crc, tg_id)
-    url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&InvoiceID={tg_id}&Description={desc}&SignatureValue={crc}"
+    id = (await rq.get_user(tg_id)).id
+    crc = hashlib.md5(f"{mrh_login}:{price}:{id}:{pass_1}".encode('utf-8')).hexdigest() #hashlib.md5(f"{mrh_login}:{price}:{tg_id}:{pass_1}")
+    print(id, crc, tg_id)
+    url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&InvoiceID={id}&Description={desc}&SignatureValue={crc}"
     print(url)
     builder.max_width = 1
     builder.add(InlineKeyboardButton(text=text.INLINE_7, url=url))
@@ -141,7 +141,7 @@ async def back(call: CallbackQuery, bot: Bot):
         limit = BASIC_LIMIT
         kb = InlineKeyboardBuilder()
         kb.add(InlineKeyboardButton(text=text.INLINE_6, callback_data="back"))
-        kb = payments_button(call.from_user.id, kb).as_markup()
+        kb = (await payments_button(call.from_user.id, kb)).as_markup()
     elif user.sub_type == "paid":
         sub_type = "платная"
         limit = PAID_LIMIT
