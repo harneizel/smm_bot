@@ -4,3 +4,5 @@ aiosqlite
 requests
 aio_scheduler
 pytz
+flask
+waitress

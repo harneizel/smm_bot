@@ -16,6 +16,7 @@ from bot.utils.coze_requests import *
 
 router = Router()
 
+# отправка печатает... ботом на время генерации нейросетью
 async def send_typing_action(chat_id, bot):
     try:
         while True:
@@ -24,12 +25,14 @@ async def send_typing_action(chat_id, bot):
     except asyncio.CancelledError:
         pass
 
+# генерация кнопки со ссылкой на оплату
 async def payments_button(tg_id, builder):
     price, mrh_login, pass_1, desc = PRICE, MRH_LOGIN, PASS_1, DESCRIPTION
     id = (await rq.get_user(tg_id)).id
-    crc = hashlib.md5(f"{mrh_login}:{price}:{id}:{pass_1}".encode('utf-8')).hexdigest() #hashlib.md5(f"{mrh_login}:{price}:{tg_id}:{pass_1}")
+    crc = hashlib.md5(f"{mrh_login}:{price}::{pass_1}:Shp_id={tg_id}".encode('utf-8')).hexdigest()
     print(id, crc, tg_id)
-    url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&InvoiceID={id}&Description={desc}&SignatureValue={crc}"
+    url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&InvID=&Description={desc}&IsTest=1&Shp_id={tg_id}&SignatureValue={crc}"
+    #url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&InvoiceID={id}&Description={desc}&SignatureValue={crc}"
     print(url)
     builder.max_width = 1
     builder.add(InlineKeyboardButton(text=text.INLINE_7, url=url))
@@ -157,7 +160,7 @@ async def back(call: CallbackQuery, bot: Bot):
                                 reply_markup=kb)
 
 # вызов кнопки оплаты подписки, не юзается так как сделано через робокассу,
-# но можете сделать через внутренние возможности телеграма
+# но можно сделать через внутренние возможности телеграма
 @router.callback_query(F.data == "bye_sub")
 async def bye_sub(call: CallbackQuery, bot: Bot):
     await bot.edit_message_text(text=text.TEXT_6, chat_id=call.message.chat.id, message_id=call.message.message_id)

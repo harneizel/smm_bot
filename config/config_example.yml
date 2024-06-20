@@ -2,11 +2,10 @@
 ADMIN_IDS: []
 
 # Токен телеграм бота
-TG_TOKEN: 123:abc  #рабочий abc
-                                                          #тестовый abc
-# токен платеги из BotFather
-PAYMENTS_TOKEN: 123  #рабочий 123
-                                      #тестовый 123
+TG_TOKEN: 123:abc
+
+# токен платеги из BotFather (не используется)
+PAYMENTS_TOKEN: 123
 
 # coze api token
 COZE_TOKEN: abc
@@ -27,12 +26,10 @@ DB_FILE: db
 TIMEZONE: Europe/Moscow
 
 # ссыль на канал/группу, бот должен быть админом в канале или участником в группе
-CHANNEL_URL: https://t.me/abc #рабочий https://abc
-                                            #тестовый https://t.me/abc
+CHANNEL_URL: https://t.me/abc
 
 # id канала/группы
-CHANNEL_ID: -100123  #рабочий -100123
-                            #тестовый -100123
+CHANNEL_ID: -100123
 
 # лимиты базовой подписки
 BASIC_LIMIT: 5
@@ -43,3 +40,17 @@ PAID_LIMIT: 20
 # адрес coze
 COZE_URL: https://api.coze.com/open_api/v2/chat
 
+        # # # # # # # # # # # # # #
+        # payments robokassa data #
+        # # # # # # # # # # # # # #
+
+# название магазина
+MRH_LOGIN: abc
+
+# пароль 1
+PASS_1: abc
+
+# пароль 2
+PASS_2: abc
+
+DESCRIPTION: Покупка месячной подписки на бота

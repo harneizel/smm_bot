@@ -24,6 +24,7 @@ COZE_BOT_ID = config['COZE_BOT_ID']
 DG_API_KEY = config['DG_API_KEY']
 MRH_LOGIN = config['MRH_LOGIN']
 PASS_1 = config['PASS_1']
+PASS_2 = config['PASS_2']
 DESCRIPTION = config['DESCRIPTION']
 
 SQLALCHEMY_URL = "sqlite+aiosqlite:///db.sqlite3"
