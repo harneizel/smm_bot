@@ -1,13 +1,13 @@
-import asyncio
-import json
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 import os
 from aiogram import Router, F, Bot
-from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, ContentType
+from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, ContentType, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+import hashlib
 
 from bot.database import requests as rq
-from bot.utils.config import CHANNEL_ID, PAYMENTS_TOKEN, PRICE, BASIC_LIMIT, PAID_LIMIT
+from bot.utils.config import CHANNEL_ID, PAYMENTS_TOKEN, PRICE, BASIC_LIMIT, PAID_LIMIT, MRH_LOGIN, PASS_1, DESCRIPTION
 import bot.aiogram_bot.markups.inline.menu_kb as inline_kb
 import bot.texts as text
 from bot.aiogram_bot.misc.states import *
@@ -24,6 +24,16 @@ async def send_typing_action(chat_id, bot):
     except asyncio.CancelledError:
         pass
 
+def payments_button(tg_id, builder):
+    price, mrh_login, pass_1, desc = PRICE, MRH_LOGIN, PASS_1, DESCRIPTION
+
+    crc = hashlib.md5(f"{mrh_login}:{price}:{tg_id}:{pass_1}".encode('utf-8')).hexdigest() #hashlib.md5(f"{mrh_login}:{price}:{tg_id}:{pass_1}")
+    print(crc, tg_id)
+    url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&InvoiceID={tg_id}&Description={desc}&SignatureValue={crc}"
+    print(url)
+    builder.max_width = 1
+    builder.add(InlineKeyboardButton(text=text.INLINE_7, url=url))
+    return builder
 
 # главное меню
 @router.message(F.text == "/start")
@@ -129,7 +139,9 @@ async def back(call: CallbackQuery, bot: Bot):
     if user.sub_type == "basic":
         sub_type = "бесплатная"
         limit = BASIC_LIMIT
-        kb = inline_kb.profile
+        kb = InlineKeyboardBuilder()
+        kb.add(InlineKeyboardButton(text=text.INLINE_6, callback_data="back"))
+        kb = payments_button(call.from_user.id, kb).as_markup()
     elif user.sub_type == "paid":
         sub_type = "платная"
         limit = PAID_LIMIT
@@ -144,7 +156,8 @@ async def back(call: CallbackQuery, bot: Bot):
                                 chat_id=call.message.chat.id, message_id=call.message.message_id,
                                 reply_markup=kb)
 
-# вызов кнопки оплаты подписки
+# вызов кнопки оплаты подписки, не юзается так как сделано через робокассу,
+# но можете сделать через внутренние возможности телеграма
 @router.callback_query(F.data == "bye_sub")
 async def bye_sub(call: CallbackQuery, bot: Bot):
     await bot.edit_message_text(text=text.TEXT_6, chat_id=call.message.chat.id, message_id=call.message.message_id)

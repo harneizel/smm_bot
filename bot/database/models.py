@@ -22,7 +22,8 @@ class User(Base):
     username: Mapped[str] = mapped_column() # тг юз
     sub_type: Mapped[str] = mapped_column() #basic, paid, ban
     rq_made: Mapped[int] = mapped_column() # кол во сделанных запросов в день
-
+    balance: Mapped[int] = mapped_column() # баланс юзера
+    making_sub_date: Mapped[str] = mapped_column() # дата оформления подписки
 
 
 async def on_startup_database():
