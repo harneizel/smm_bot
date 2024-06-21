@@ -32,7 +32,7 @@ async def payments_button(tg_id, builder):
     crc = hashlib.md5(f"{mrh_login}:{price}::{pass_1}:Shp_id={tg_id}".encode('utf-8')).hexdigest()
     print(id, crc, tg_id)
     url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&InvID=&Description={desc}&IsTest=1&Shp_id={tg_id}&SignatureValue={crc}"
-    #url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&InvoiceID={id}&Description={desc}&SignatureValue={crc}"
+    #url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&InvID=&Description={desc}&SignatureValue={crc}"
     print(url)
     builder.max_width = 1
     builder.add(InlineKeyboardButton(text=text.INLINE_7, url=url))
@@ -96,27 +96,43 @@ async def gpt_answer(message: Message, state: FSMContext, bot: Bot):
 
         try:
             response = await coze_request(str(message.from_user.id), message.text, history)
+            if response != "end_tokens":
+                for i in response:
+                    history.append(i)
+                print(f"История с ответом: {history}")
+                with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='w',
+                          encoding='utf-8') as file:
+                    json.dump(history, file, ensure_ascii=False, indent=4)
+                    print("файл записан")
+
+                await message.answer(response[0]['content'], reply_markup=inline_kb.end_chat)
+                await rq.plus_rq_made(message.from_user.id)
+                await state.set_state(UserMessages.to_gpt)
+            else:
+                await message.answer(text.TEXT_29, reply_markup=inline_kb.end_chat)
         finally:
             typing_task.cancel()
             await typing_task
 
-        for i in response:
-            history.append(i)
-        print(f"История с ответом: {history}")
-        with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='w', encoding='utf-8') as file:
-            json.dump(history, file, ensure_ascii=False, indent=4)
-            print("файл записан")
+        # for i in response:
+        #     history.append(i)
+        # print(f"История с ответом: {history}")
+        # with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='w', encoding='utf-8') as file:
+        #     json.dump(history, file, ensure_ascii=False, indent=4)
+        #     print("файл записан")
+        #
+        # await message.answer(response[0]['content'], reply_markup=inline_kb.end_chat)
+        # await rq.plus_rq_made(message.from_user.id)
+        # await state.set_state(UserMessages.to_gpt)
 
-        await message.answer(response[0]['content'], reply_markup=inline_kb.end_chat)
-        await rq.plus_rq_made(message.from_user.id)
-        await state.set_state(UserMessages.to_gpt)
+    elif user.sub_type == "basic" and user.rq_made >= BASIC_LIMIT: # при бесплатной подписке предлагает купить
+        kb = InlineKeyboardBuilder()
+        kb.add(InlineKeyboardButton(text=text.INLINE_6, callback_data="back"))
+        kb = (await payments_button(message.from_user.id, kb)).as_markup()
+        await message.answer(text.TEXT_20, reply_markup=kb)
 
-    elif user.sub_type == "basic" and user.rq_made>=BASIC_LIMIT:
-        await message.answer(text.TEXT_20, reply_markup=inline_kb.end_chat)
-        print("бесплатная подписка, превышены запросы")
-    elif user.sub_type == "paid" and user.rq_made>=PAID_LIMIT:
+    elif user.sub_type == "paid" and user.rq_made>=PAID_LIMIT: # при платной говорит что лимиты закончились и все
         await message.answer(text.TEXT_21, reply_markup=inline_kb.end_chat)
-        print("платная подписка, превышены запросы")
 
 
 

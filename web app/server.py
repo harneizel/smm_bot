@@ -1,7 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, request
 import hashlib
-from bot.utils.config import MRH_LOGIN, PASS_2
 from waitress import serve
+import asyncio
+
+from bot.utils.config import MRH_LOGIN, PASS_2
+from bot.database import requests as rq
 
 app = Flask(__name__)
 
@@ -30,10 +33,11 @@ def get_payment():
     SignatureIntended = hashlib.md5(f"{OutSum}:{InvId}:{pass_2}:Shp_id={Id}".encode('utf-8')).hexdigest() # предполагаемая подпись
     if SignatureIntended==SignatureValue:
         print(f"ПОДПИСИ СОВПАЛИ, ID: {Id}")
+        asyncio.run(rq.sub_type_paid(int(Id)))
         return f"OK{InvId}"
 
 if __name__ == '__main__':
     try:
-        serve(app, host="0.0.0.0", port=8080) # запуск сервера
+        app.run(host="0.0.0.0") # запуск сервера
     except:
         print("Завершение работы")
