@@ -1,13 +1,15 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 import os
 from aiogram import Router, F, Bot
-from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, ContentType, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, ContentType, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 import hashlib
 
 from bot.database import requests as rq
-from bot.utils.config import CHANNEL_ID, PAYMENTS_TOKEN, PRICE, BASIC_LIMIT, PAID_LIMIT, MRH_LOGIN, PASS_1, DESCRIPTION
+from bot.utils.config import CHANNEL_ID, PAYMENTS_TOKEN, PRICE, BASIC_LIMIT, PAID_LIMIT, \
+    MRH_LOGIN, PASS_1, DESCRIPTION
+from bot.utils.util import get_epoch
 import bot.aiogram_bot.markups.inline.menu_kb as inline_kb
 import bot.texts as text
 from bot.aiogram_bot.misc.states import *
@@ -91,8 +93,8 @@ async def gpt_answer(message: Message, state: FSMContext, bot: Bot):
                 history = json.load(file)
 
         print(f"Изначальная история: {history}")
-
-        history.append({"role":"user", "content": message.text, "content_type":"text"})
+        epoch = get_epoch()
+        history.append({"role":"user", "content": message.text, "content_type":"text", "epoch":epoch})
 
         try:
             response = await coze_request(str(message.from_user.id), message.text, history)

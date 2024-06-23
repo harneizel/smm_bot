@@ -29,7 +29,6 @@ async def coze_request(tg_id, query, history):
                 else:
                     data = data["messages"]
                     print(f"ответ нейронки {data}")
-                    print(type(data))
                     return data
 
             #response = (json.loads(await response.text())["messages"]
