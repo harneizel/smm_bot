@@ -14,8 +14,7 @@ async def coze_request(tg_id, query, history):
                    'Accept': '*/*',
                    'Host':'api.coze.com',
                    'Connection':'keep-alive'}
-        data = {'conversation_id':'123',
-                'bot_id': str(coze_id),
+        data = {'bot_id': str(coze_id), #'conversation_id':'123',
                 'user': str(tg_id),
                 'query': query,
                 'stream': False,
