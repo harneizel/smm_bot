@@ -75,8 +75,6 @@ async def dialogue(call: CallbackQuery, bot: Bot, state: FSMContext):
 # обрабатывает диалог с нейронкой
 @router.message(UserMessages.to_gpt)
 async def gpt_answer(message: Message, state: FSMContext, bot: Bot):
-    typing_task = asyncio.create_task(send_typing_action(message.from_user.id, bot))
-    await bot.send_chat_action(message.from_user.id, "typing")
     print("Текст пользователя: " + message.text)
     user = await rq.search_id(message.from_user.id)
     print(user.sub_type)
@@ -91,23 +89,24 @@ async def gpt_answer(message: Message, state: FSMContext, bot: Bot):
             else:
                 file.seek(0)
                 history = json.load(file)
-
+        typing_task = asyncio.create_task(send_typing_action(message.from_user.id, bot))
         print(f"Изначальная история: {history}")
         epoch = get_epoch()
         history.append({"role":"user", "content": message.text, "content_type":"text", "epoch":epoch})
 
         try:
             response = await coze_request(str(message.from_user.id), message.text, history)
-            if response != "end_tokens":
-                for i in response:
-                    history.append(i)
+            if 'role' in response and 'type' in response and 'content' in response:
+                epoch = get_epoch()
+                response['epoch'] = epoch
+                history.append(response)
                 print(f"История с ответом: {history}")
                 with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='w',
                           encoding='utf-8') as file:
                     json.dump(history, file, ensure_ascii=False, indent=4)
                     print("файл записан")
 
-                await message.answer(response[0]['content'], reply_markup=inline_kb.end_chat)
+                await message.answer(response['content'], reply_markup=inline_kb.end_chat)
                 await rq.plus_rq_made(message.from_user.id)
                 await state.set_state(UserMessages.to_gpt)
             else:

@@ -23,13 +23,17 @@ async def coze_request(tg_id, query, history):
         async with await session.post(url=url, headers=headers, data=json.dumps(data)) as response:
             if response.status == 200:
                 data = (json.loads(await response.text()))
-                if len(data)==2 and data['msg']=="Your Token quota has been used up. Please visit https://www.coze.com/token to top up your tokens. If you have any questions, please contact coze support.":
-                    print("ЗАКОНЧИЛИСЬ ТОКЕНЫ")
-                    return "end_tokens"
-                else:
+                print(data)
+                if data['code']==0 and data['msg']=='success':
                     data = data["messages"]
-                    print(f"ответ нейронки {data}")
-                    return data
+                    for message in data:
+                        if message['role']=='assistant' and message['type']=='answer':
+                            print(f"ответ нейронки {message}")
+                            return message
+                    return "unknow_error" # если до этого дошло то сообщения нет
+                elif len(data)==2 and data['msg']=="Your Token quota has been used up. Please visit https://www.coze.com/token to top up your tokens. If you have any questions, please contact coze support.":
+                    print("ЗАКОНЧИЛИСЬ ТОКЕНЫ")
+                    return "end_tokens" # токены закончились
 
             #response = (json.loads(await response.text())["messages"]
             #print(f"messages {response}")
