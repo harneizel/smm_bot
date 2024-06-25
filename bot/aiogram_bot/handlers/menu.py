@@ -8,8 +8,8 @@ import hashlib
 
 from bot.database import requests as rq
 from bot.utils.config import CHANNEL_ID, PAYMENTS_TOKEN, PRICE, BASIC_LIMIT, PAID_LIMIT, \
-    MRH_LOGIN, PASS_1, DESCRIPTION
-from bot.utils.util import get_epoch
+    MRH_LOGIN, PASS_1, DESCRIPTION, IS_TEST as is_test, TEST_PASS_1, ROBOKASSA_PAYMENT_URL as robo_url
+from bot.utils.util import get_epoch, generate_payment_link
 import bot.aiogram_bot.markups.inline.menu_kb as inline_kb
 import bot.texts as text
 from bot.aiogram_bot.misc.states import *
@@ -29,12 +29,22 @@ async def send_typing_action(chat_id, bot):
 
 # генерация кнопки со ссылкой на оплату
 async def payments_button(tg_id, builder):
-    price, mrh_login, pass_1, desc = PRICE, MRH_LOGIN, PASS_1, DESCRIPTION
-    id = (await rq.get_user(tg_id)).id
-    crc = hashlib.md5(f"{mrh_login}:{price}::{pass_1}:Shp_id={tg_id}".encode('utf-8')).hexdigest()
-    print(id, crc, tg_id)
-    url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&InvID=&Description={desc}&IsTest=1&Shp_id={tg_id}&SignatureValue={crc}"
+    price, mrh_login, pass_1, test_pass_1, desc = PRICE, MRH_LOGIN, PASS_1, TEST_PASS_1, DESCRIPTION
+    desc = "Покупка месячной подписки на бота"
+    tg_id = (await rq.get_user(tg_id)).id
+    if is_test == 0:
+        url = generate_payment_link(merchant_login=mrh_login, merchant_password_1=pass_1, cost=price,
+                                    description=desc, is_test=is_test, Shp_id=tg_id, robokassa_payment_url=robo_url)
+    elif is_test == 1:
+        url = generate_payment_link(merchant_login=mrh_login, merchant_password_1=test_pass_1, cost=price,
+                                    description=desc, is_test=is_test, Shp_id=tg_id, robokassa_payment_url=robo_url)
+
+
+    #crc = hashlib.md5(f"{mrh_login}:{price}::{pass_1}:Shp_id={tg_id}".encode('utf-8')).hexdigest()
+    #print(id, crc, tg_id)
+    #url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&Description={desc}&IsTest=1&Shp_id={tg_id}&SignatureValue={crc}"
     #url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&InvID=&Description={desc}&SignatureValue={crc}"
+
     print(url)
     builder.max_width = 1
     builder.add(InlineKeyboardButton(text=text.INLINE_7, url=url))
