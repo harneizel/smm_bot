@@ -30,8 +30,7 @@ async def send_typing_action(chat_id, bot):
 # генерация кнопки со ссылкой на оплату
 async def payments_button(tg_id, builder):
     price, mrh_login, pass_1, test_pass_1, desc = PRICE, MRH_LOGIN, PASS_1, TEST_PASS_1, DESCRIPTION
-    desc = "Покупка месячной подписки на бота"
-    tg_id = (await rq.get_user(tg_id)).id
+    #tg_id = (await rq.get_user(tg_id)).id
     if is_test == 0:
         url = generate_payment_link(merchant_login=mrh_login, merchant_password_1=pass_1, cost=price,
                                     description=desc, is_test=is_test, Shp_id=tg_id, robokassa_payment_url=robo_url)

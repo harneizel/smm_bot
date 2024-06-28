@@ -44,6 +44,11 @@ COZE_URL: https://api.coze.com/open_api/v2/chat
         # payments robokassa data #
         # # # # # # # # # # # # # #
 
+# тестовый ли платеж, нолик если нет, единица если да
+IS_TEST: 1
+
+ROBOKASSA_PAYMENT_URL: https://auth.robokassa.ru/Merchant/Index.aspx
+
 # название магазина
 MRH_LOGIN: abc
 
@@ -53,4 +58,11 @@ PASS_1: abc
 # пароль 2
 PASS_2: abc
 
+# тестовый пароль 1
+TEST_PASS_1: dge
+
+# тестовый пароль 2
+TEST_PASS_2: efw
+
+# описание
 DESCRIPTION: Покупка месячной подписки на бота
