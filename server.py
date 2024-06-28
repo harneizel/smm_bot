@@ -32,7 +32,7 @@ def get_payment():
     print(OutSum, InvId, Fee, EMail, SignatureValue, PaymentMethod, IncCurrLabel, Id)
     pass_2 = PASS_2
     SignatureIntended = hashlib.md5(f"{OutSum}:{InvId}:{pass_2}:Shp_id={Id}".encode('utf-8')).hexdigest() # предполагаемая подпись
-    SignatureIntended = upper(SignatureIntended)
+    SignatureIntended = SignatureIntended.upper()
     print(SignatureValue, SignatureIntended)
     if SignatureIntended==SignatureValue:
         print(f"ПОДПИСИ СОВПАЛИ, ID: {Id}")
