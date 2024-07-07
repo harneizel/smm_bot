@@ -4,6 +4,6 @@ aiosqlite
 requests
 aio_scheduler
 pytz
-flask
+fastapi
 waitress
 gunicorn
