@@ -17,20 +17,20 @@ class User(Base):
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    tg_id = mapped_column(BigInteger) # айти в тг
-    name: Mapped[str] = mapped_column() # имя в тг
-    username: Mapped[str] = mapped_column() # тг юз
-    description: Mapped[str] = mapped_column()
-    sub_type: Mapped[str] = mapped_column() #basic, paid, ban
-    rq_made: Mapped[int] = mapped_column() # кол во сделанных запросов в день
-    balance: Mapped[int] = mapped_column() # баланс юзера
-    making_sub_date: Mapped[str] = mapped_column() # дата оформления подписки
-    tag1: Mapped[str] = mapped_column() # теги юзера
-    tag2: Mapped[str] = mapped_column()
-    tag3: Mapped[str] = mapped_column()
-    tag4: Mapped[str] = mapped_column()
-    tag5: Mapped[str] = mapped_column()
-    dods: Mapped[str] = mapped_column() # давно отложенные дела
+    tg_id = mapped_column(BigInteger, nullable=False)  # айти в тг
+    name: Mapped[str] = mapped_column(nullable=False)  # имя в тг
+    username: Mapped[str] = mapped_column(nullable=True)  # тг юз
+    description: Mapped[str] = mapped_column(nullable=True)
+    sub_type: Mapped[str] = mapped_column(nullable=False)  # basic, paid, ban
+    rq_made: Mapped[int] = mapped_column(nullable=False)  # кол во сделанных запросов в день
+    balance: Mapped[int] = mapped_column(nullable=False)  # баланс юзера
+    making_sub_date: Mapped[str] = mapped_column(nullable=True)  # дата оформления подписки
+    tag1: Mapped[str] = mapped_column(nullable=True)  # теги юзера
+    tag2: Mapped[str] = mapped_column(nullable=True)
+    tag3: Mapped[str] = mapped_column(nullable=True)
+    tag4: Mapped[str] = mapped_column(nullable=True)
+    tag5: Mapped[str] = mapped_column(nullable=True)
+    dods: Mapped[str] = mapped_column(nullable=True)  # давно отложенные дела
 
 
 

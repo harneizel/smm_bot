@@ -1,10 +1,11 @@
 let tg = window.Telegram.WebApp;
 
-const getData = () => {
-    axios.get('http://').then(r +> {
-    console.log('r', r)
-    })
-}
+fetch('http://127.0.0.1:8000/user_info/{user_id}')
+  .then(response => response.text())
+  .then(data => {
+    document.getElementById("description").innerHTML = data;
+  })
+  .catch(error => console.error('Error:', error));
 
 tg.expand();
 

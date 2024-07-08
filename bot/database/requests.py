@@ -10,8 +10,8 @@ async def add_user(tg_id: int, name, username):
         try:
             user = await session.scalar(select(User).where(User.tg_id == tg_id))
             if not user:
-                user = User(tg_id=tg_id, name=name, username=username, sub_type="basic", rq_made=0, balance=0,
-                            making_sub_date="no_date")
+                user = User(tg_id=tg_id, name=name, username=username, description=None, sub_type="basic", rq_made=0, balance=0,
+                            making_sub_date="no_date", tag1=None, tag2=None, tag3=None, tag4=None, tag5=None, dods=None)
                 session.add(user)
                 await session.commit()
         except SQLAlchemyError as e:

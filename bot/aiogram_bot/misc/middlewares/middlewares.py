@@ -21,7 +21,6 @@ class SubsriptionMiddleware(BaseMiddleware):
         if event.message and event.message.chat.type=="private":
             user_id = event.message.from_user.id
             print(f"Юзер ID: {user_id}")
-            #try:
             member = await self.bot.get_chat_member(channel_id, user_id)
             print(member.status)
 
