@@ -13,22 +13,22 @@ start_inlinekeyboard = types.InlineKeyboardMarkup(
 menu_kb = types.InlineKeyboardMarkup(
     inline_keyboard=[
         [types.InlineKeyboardButton(text=text.INLINE_3, callback_data="dialogue")],
-        [types.InlineKeyboardButton(text=text.INLINE_4, callback_data="profile")]
-       # [types.InlineKeyboardButton(text="Web app", web_app=types.WebAppInfo(url='https://harneizel.github.io/webapp.github.io/'))] # пока не доделано
+        #[types.InlineKeyboardButton(text=text.INLINE_4, callback_data="profile")]
+        [types.InlineKeyboardButton(text=text.INLINE_4, web_app=types.WebAppInfo(url='https://147.45.246.252:80/app'))] # пока не доделано
     ],
 ) # https://harneizel.github.io/webapp.github.io/
 
 back = types.InlineKeyboardMarkup(
     inline_keyboard=[
         [types.InlineKeyboardButton(text=text.INLINE_5, callback_data="new_dialogue")],
-         [types.InlineKeyboardButton(text=text.INLINE_6, callback_data="back")],
+        [types.InlineKeyboardButton(text=text.INLINE_6, callback_data="back")],
     ],
 )
 
 profile = types.InlineKeyboardMarkup(
     inline_keyboard=[
         [types.InlineKeyboardButton(text=text.INLINE_7, callback_data="bye_sub")],
-         [types.InlineKeyboardButton(text=text.INLINE_6, callback_data="back")],
+        [types.InlineKeyboardButton(text=text.INLINE_6, callback_data="back")],
     ],
 )
 
@@ -50,8 +50,8 @@ rules_approval = types.InlineKeyboardMarkup(
     ],
 )
 
-web_app =  types.InlineKeyboardMarkup(
+web_app =  types.InlineKeyboardMarkup(row_width=1,
     inline_keyboard=[
-        [types.InlineKeyboardButton(text='Запустить веб приложение', web_app=types.web_app_info.WebAppInfo(url=''))]
+        [types.InlineKeyboardButton(text='Мой профиль', web_app=types.WebAppInfo(url=f'https://ya.ru/'))]
     ],
 )

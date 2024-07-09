@@ -1,24 +1,34 @@
 from flask import Flask, request
 import hashlib
-import json
+from fastapi.staticfiles import StaticFiles
+import uvicorn
 import asyncio
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-import uvicorn
+from fastapi.responses import HTMLResponse, FileResponse
 
 from bot.utils.config import MRH_LOGIN, PASS_2
 from bot.database import requests as rq
 
 app = FastAPI()
 
+# Настройка CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Разрешить все источники, можно указать конкретные домены
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+# Mount the static directory
+app.mount("/js", StaticFiles(directory="web-app/js"), name="js")
 
 # получение данных для подтверждения
 @app.get('/get-payment')
 async def get_payment():
     print("get payment получен")
-    OutSum = request.form.get('OutSum')  # сумма платежа
-    InvId = request.form.get('InvId')  # id клиента
+    OutSum: str = request.form.get('OutSum')  # сумма платежа
+    InvId: int = request.form.get('InvId')  # id клиента
     Fee = request.form.get('Fee')  # комиссия
     EMail = request.form.get('Email')  # email указанный при оплате
     SignatureValue = request.form.get('SignatureValue')  # полученная контрольная сумма
@@ -37,14 +47,14 @@ async def get_payment():
     print("подписи не совпали")
 
 @app.get('/app')
-def open_app():
+async def open_app():
     print("Приложение открыто")
     with open('./web-app/index.html', 'r') as file:
         html_content = file.read()
     return HTMLResponse(content=html_content, status_code=200)
 
 @app.get('/app/knowledge')
-def open_app():
+async def open_app():
     print("knowledge открыто")
     with open('./web-app/knowledge.html', 'r') as file:
         html_content = file.read()
@@ -57,6 +67,7 @@ def open_app():
         html_content = file.read()
     return HTMLResponse(content=html_content, status_code=200)
 
+
 @app.get('/user_info/{user_id}')
 async def user_info(user_id: int):
     print(user_id)
@@ -67,8 +78,9 @@ async def user_info(user_id: int):
     #json_data = json.dumps(data)
     return data
 
-'''if __name__ == '__main__':
+# Запуск сервера с HTTPS
+if __name__ == "__main__":
     try:
-         # запуск сервера
+        uvicorn.run(app, host="0.0.0.0", port=443, ssl_keyfile="web-app/ssl/private.pem", ssl_certfile="web-app/ssl/public.pem")
     except:
-        print("Завершение работы")'''
+        print("Ошибка")
