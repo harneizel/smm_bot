@@ -10,8 +10,8 @@ async def add_user(tg_id: int, name, username):
         try:
             user = await session.scalar(select(User).where(User.tg_id == tg_id))
             if not user:
-                user = User(tg_id=tg_id, name=name, username=username, description=None, sub_type="basic", rq_made=0, balance=0,
-                            making_sub_date="no_date", tag1=None, tag2=None, tag3=None, tag4=None, tag5=None, dods=None)
+                user = User(tg_id=tg_id, name=name, username=username, description='', sub_type="basic", rq_made=0, balance=0,
+                            making_sub_date="no_date", tag1='', tag2='', tag3='', tag4='', tag5='', dods='')
                 session.add(user)
                 await session.commit()
         except SQLAlchemyError as e:
@@ -113,7 +113,8 @@ async def reset_to_zero_requests():
 
 async def get_user_data(tg_id: int):
     async with async_session() as session:
-        user = await session.scalar(
-            select(User.description, User.tag1, User.tag2, User.tag3, User.tag4, User.tag5).where(User.tg_id == tg_id))
+        user = (await session.execute(
+            select(User.description, User.tag1, User.tag2, User.tag3, User.tag4, User.tag5).where(
+                User.tg_id == tg_id))).first()
         print(user)
         return user

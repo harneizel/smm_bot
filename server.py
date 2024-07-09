@@ -61,10 +61,11 @@ def open_app():
 async def user_info(user_id: int):
     print(user_id)
     user_data = await rq.get_user_data(user_id)
-    data = [('desc', user_data[0]), ('tag1', user_data[1]), ('tag2', user_data[2]),
-            ('tag3', user_data[3]), ('tag4', user_data[4]),('tag5', user_data[5])]
-    json_data = json.dumps(data)
-    return json_data
+    print(user_data)
+    data = {'desc': user_data[0], 'tag1': user_data[1], 'tag2': user_data[2],
+            'tag3': user_data[3], 'tag4': user_data[4],'tag5': user_data[5]}
+    #json_data = json.dumps(data)
+    return data
 
 '''if __name__ == '__main__':
     try:

@@ -1,9 +1,9 @@
 let tg = window.Telegram.WebApp;
 
-fetch('http://127.0.0.1:8000/user_info/{user_id}')
-  .then(response => response.text())
+fetch('http://147.45.246.252/user_info/${tg.initDataUnsafe.user.id}')
+  .then(response => response.json())
   .then(data => {
-    document.getElementById("description").innerHTML = data;
+    document.getElementById("description").innerHTML = data.description;
   })
   .catch(error => console.error('Error:', error));
 
