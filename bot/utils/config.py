@@ -11,7 +11,7 @@ with open(config_path, "r") as f:
 TG_TOKEN = config['TG_TOKEN']
 PG_HOST = config['DB_FILE']
 TIMEZONE = config['TIMEZONE']
-CHANNEL_ID = config['CHANNEL_ID'] #имя канала без @
+CHANNEL_ID = config['CHANNEL_ID'] #ID канала
 CHANNEL_URL = str(config['CHANNEL_URL'])
 PAYMENTS_TOKEN = config['PAYMENTS_TOKEN']
 PRICE = int(config['PRICE'])
@@ -30,5 +30,6 @@ ROBOKASSA_PAYMENT_URL = config['ROBOKASSA_PAYMENT_URL']
 IS_TEST = int(config['IS_TEST'])
 TEST_PASS_1 = config['TEST_PASS_1']
 TEST_PASS_2 = config['TEST_PASS_2']
+LOGS_ID = int(config['LOGS_ID'])
 
 SQLALCHEMY_URL = "sqlite+aiosqlite:///db.sqlite3"

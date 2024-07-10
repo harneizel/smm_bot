@@ -14,7 +14,7 @@ async def coze_request(tg_id, query, history):
                    'Accept': '*/*',
                    'Host':'api.coze.com',
                    'Connection':'keep-alive'}
-        data = {'bot_id': str(coze_id), #'conversation_id':'123',
+        data = {'bot_id': str(coze_id), #'conversation_id':'',
                 'user': str(tg_id),
                 'query': query,
                 'stream': False,
@@ -22,7 +22,7 @@ async def coze_request(tg_id, query, history):
         async with await session.post(url=url, headers=headers, data=json.dumps(data)) as response:
             if response.status == 200:
                 data = (json.loads(await response.text()))
-                print(data)
+                print(f"ОТВЕТ НЕЙРОНКИ БЕЗ ОБРАБОТКИ: {data}")
                 if data['code']==0 and data['msg']=='success':
                     data = data["messages"]
                     for message in data:
@@ -34,8 +34,4 @@ async def coze_request(tg_id, query, history):
                     print("ЗАКОНЧИЛИСЬ ТОКЕНЫ")
                     return "end_tokens" # токены закончились
 
-            #response = (json.loads(await response.text())["messages"]
-            #print(f"messages {response}")
-            #print(type(response))
-            #return response
 

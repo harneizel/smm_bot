@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 
 from bot.database import requests as rq
 from bot.utils.config import CHANNEL_ID, PAYMENTS_TOKEN, PRICE, BASIC_LIMIT, PAID_LIMIT, \
-    MRH_LOGIN, PASS_1, DESCRIPTION, IS_TEST as is_test, TEST_PASS_1, ROBOKASSA_PAYMENT_URL as robo_url
+    MRH_LOGIN, PASS_1, DESCRIPTION, IS_TEST as is_test, TEST_PASS_1, ROBOKASSA_PAYMENT_URL as robo_url, LOGS_ID as logs_id
 from bot.utils.util import get_epoch, generate_payment_link
 import bot.aiogram_bot.markups.inline.menu_kb as inline_kb
 import bot.texts as text
@@ -36,12 +36,6 @@ async def payments_button(tg_id, builder):
     elif is_test == 1:
         url = generate_payment_link(merchant_login=mrh_login, merchant_password_1=test_pass_1, cost=price,
                                     description=desc, is_test=is_test, Shp_id=tg_id, robokassa_payment_url=robo_url)
-
-
-    #crc = hashlib.md5(f"{mrh_login}:{price}::{pass_1}:Shp_id={tg_id}".encode('utf-8')).hexdigest()
-    #print(id, crc, tg_id)
-    #url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&Description={desc}&IsTest=1&Shp_id={tg_id}&SignatureValue={crc}"
-    #url = f"https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin={mrh_login}&OutSum={price}&InvID=&Description={desc}&SignatureValue={crc}"
 
     print(url)
     builder.max_width = 1
@@ -78,6 +72,7 @@ async def dialogue(call: CallbackQuery, bot: Bot, state: FSMContext):
         pass
     await bot.edit_message_text(text=text.TEXT_3, chat_id=call.message.chat.id, message_id=call.message.message_id,
                                 reply_markup=inline_kb.end_chat)
+    await bot.send_message(chat_id=logs_id, text=f"""#пользователь{call.from_user.id}\nid:`{call.from_user.id}`\nНачат новый чат""")
     await state.set_state(UserMessages.to_gpt)
 
 # обрабатывает диалог с нейронкой
@@ -86,6 +81,7 @@ async def gpt_answer(message: Message, state: FSMContext, bot: Bot):
     print("Текст пользователя: " + message.text)
     user = await rq.search_id(message.from_user.id)
     print(user.sub_type)
+    await bot.send_message(chat_id=logs_id, text=f"""#пользователь{message.from_user.id}\nid:`{message.from_user.id}`\nСообщение пользователя к ChatGPT:\n\n{message.text}""")
     if (user.sub_type == "paid" and user.rq_made < PAID_LIMIT) or (user.sub_type == "basic" and user.rq_made < BASIC_LIMIT): # проверяет достаточно ли запросов у юзера
         if not os.path.exists(f"./bot/database/histories/{message.from_user.id}.json"):
             os.mknod(f"./bot/database/histories/{message.from_user.id}.json")
@@ -115,6 +111,8 @@ async def gpt_answer(message: Message, state: FSMContext, bot: Bot):
                     print("файл записан")
 
                 await message.answer(response['content'], reply_markup=inline_kb.end_chat)
+                await bot.send_message(chat_id=logs_id,
+                                       text=f"""#пользователь{message.from_user.id}\nid:`{message.from_user.id}`\nОтвет ChatGPT:\n\n{response['content']}""")
                 await rq.plus_rq_made(message.from_user.id)
                 await state.set_state(UserMessages.to_gpt)
             else:
@@ -123,24 +121,15 @@ async def gpt_answer(message: Message, state: FSMContext, bot: Bot):
             typing_task.cancel()
             await typing_task
 
-        # for i in response:
-        #     history.append(i)
-        # print(f"История с ответом: {history}")
-        # with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='w', encoding='utf-8') as file:
-        #     json.dump(history, file, ensure_ascii=False, indent=4)
-        #     print("файл записан")
-        #
-        # await message.answer(response[0]['content'], reply_markup=inline_kb.end_chat)
-        # await rq.plus_rq_made(message.from_user.id)
-        # await state.set_state(UserMessages.to_gpt)
-
     elif user.sub_type == "basic" and user.rq_made >= BASIC_LIMIT: # при бесплатной подписке предлагает купить
+        await state.clear()
         kb = InlineKeyboardBuilder()
         kb.add(InlineKeyboardButton(text=text.INLINE_6, callback_data="back"))
         kb = (await payments_button(message.from_user.id, kb)).as_markup()
         await message.answer(text.TEXT_20, reply_markup=kb)
 
     elif user.sub_type == "paid" and user.rq_made>=PAID_LIMIT: # при платной говорит что лимиты закончились и все
+        await state.clear()
         await message.answer(text.TEXT_21, reply_markup=inline_kb.end_chat)
 
 

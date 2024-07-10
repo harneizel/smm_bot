@@ -13,8 +13,8 @@ start_inlinekeyboard = types.InlineKeyboardMarkup(
 menu_kb = types.InlineKeyboardMarkup(
     inline_keyboard=[
         [types.InlineKeyboardButton(text=text.INLINE_3, callback_data="dialogue")],
-        #[types.InlineKeyboardButton(text=text.INLINE_4, callback_data="profile")]
-        [types.InlineKeyboardButton(text=text.INLINE_4, web_app=types.WebAppInfo(url='https://147.45.246.252:80/app'))] # пока не доделано
+        [types.InlineKeyboardButton(text=text.INLINE_4, callback_data="profile")]
+        #[types.InlineKeyboardButton(text=text.INLINE_4, web_app=types.WebAppInfo(url='https://147.45.246.252:80/app'))] # пока не доделано
     ],
 ) # https://harneizel.github.io/webapp.github.io/
 
