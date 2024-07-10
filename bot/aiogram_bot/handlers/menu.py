@@ -42,6 +42,7 @@ async def payments_button(tg_id, builder):
     builder.add(InlineKeyboardButton(text=text.INLINE_7, url=url))
     return builder
 
+
 # главное меню
 @router.message(F.text == "/start")
 async def start_btn(message: Message, bot: Bot):

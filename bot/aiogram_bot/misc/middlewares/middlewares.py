@@ -7,7 +7,7 @@ from bot.texts import *
 from bot.aiogram_bot.markups.inline.menu_kb import start_inlinekeyboard
 from bot.database.requests import is_user, add_user
 from bot.aiogram_bot.markups.inline.menu_kb import rules_approval
-from bot.utils.config import CHANNEL_ID as channel_id
+from bot.utils.config import CHANNEL_ID as channel_id, LOGS_ID as logs_id
 
 # если юзер не подписан на канал бот не будет с ним работать
 class SubsriptionMiddleware(BaseMiddleware):
@@ -26,6 +26,8 @@ class SubsriptionMiddleware(BaseMiddleware):
 
             if await is_user(user_id) == "not_user":
                 await add_user(user_id, event.message.from_user.first_name, event.message.from_user.username)
+                await self.bot.send_message(chat_id=logs_id,
+                                       text=f"""#пользователь{user_id}\nid:`{user_id}`\n{TEXT_31}""")
                 await event.message.answer(text=TEXT_27, reply_markup=rules_approval)
             elif member.status in [mbStatus.MEMBER, mbStatus.CREATOR, mbStatus.ADMINISTRATOR]:
                 return await handler(event, data)

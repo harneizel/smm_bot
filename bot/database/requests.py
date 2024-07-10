@@ -3,7 +3,6 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from bot.database.models import async_session, User
 
-
 # добавление юзера в бд
 async def add_user(tg_id: int, name, username):
     async with async_session() as session:
