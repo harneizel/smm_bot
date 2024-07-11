@@ -1,6 +1,7 @@
-from sqlalchemy import BigInteger, JSON
+from sqlalchemy import BigInteger, event
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.utils.config import SQLALCHEMY_URL
 
@@ -32,7 +33,22 @@ class User(Base):
     tag5: Mapped[str] = mapped_column(nullable=True)
     dods: Mapped[str] = mapped_column(nullable=True)  # давно отложенные дела
 
+# общий счетчик всех диалогов, нужен для conversation_id у coze
+class Sessions(Base):
+    __tablename__ = 'sessions'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    conversation_id: Mapped[int] = mapped_column(nullable=True)
 
+# созадет в sessions счетчик при создании бд
+async def after_create_sessions():
+    async with async_session() as session:
+        async with session.begin():
+            new_session = Sessions(id=1, conversation_id=1)
+            session.add(new_session)
+            await session.commit()
+
+# Привязка функции-обработчика к событию after_create для таблицы Sessions
+event.listen(Sessions.__table__, 'after_create', await after_create_sessions)
 
 async def on_startup_database():
     async with engine.begin() as conn:

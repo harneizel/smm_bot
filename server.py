@@ -5,6 +5,7 @@ import uvicorn
 import asyncio
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from bot.utils.config import MRH_LOGIN, PASS_2
 from bot.database import requests as rq
@@ -23,7 +24,7 @@ app.add_middleware(
 # Mount the static directory
 app.mount("/js", StaticFiles(directory="web-app/js"), name="js")
 
-# получение данных для подтверждения
+# получение данных платежки для подтверждения
 @app.get('/get-payment')
 async def get_payment():
     print("get payment получен")
@@ -46,6 +47,7 @@ async def get_payment():
         return f"OK{InvId}"
     print("подписи не совпали")
 
+# главная страница web app
 @app.get('/app')
 async def open_app():
     print("Приложение открыто")
@@ -67,7 +69,7 @@ def open_app():
         html_content = file.read()
     return HTMLResponse(content=html_content, status_code=200)
 
-
+# забирание инфо о пользователе
 @app.get('/user_info/{user_id}')
 async def user_info(user_id: int):
     print(user_id)
@@ -81,6 +83,6 @@ async def user_info(user_id: int):
 # Запуск сервера с HTTPS
 if __name__ == "__main__":
     try:
-        uvicorn.run(app, host="0.0.0.0", port=443, ssl_keyfile="web-app/ssl/private.pem", ssl_certfile="web-app/ssl/public.pem")
+        uvicorn.run(app, host="0.0.0.0", port=443, ssl_keyfile="web-app/ssl/YOURPRIVATE.key", ssl_certfile="web-app/ssl/YOURPUBLIC.pem")
     except:
         print("Ошибка")
