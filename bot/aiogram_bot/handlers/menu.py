@@ -3,6 +3,7 @@ import os
 from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, ContentType, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
+import time
 
 
 from bot.database import requests as rq
@@ -71,6 +72,7 @@ async def dialogue(call: CallbackQuery, bot: Bot, state: FSMContext):
         print("файл создан")
     with open(file=f"./bot/database/histories/{str(call.from_user.id)}.json", mode='w', encoding='utf-8') as file:
         pass
+    await rq.conv_id(call.from_user.id)
     await bot.edit_message_text(text=text.TEXT_3, chat_id=call.message.chat.id, message_id=call.message.message_id,
                                 reply_markup=inline_kb.end_chat)
     await bot.send_message(chat_id=logs_id, text=f"""#пользователь{call.from_user.id}\nid:`{call.from_user.id}`\nНачат новый чат""")
@@ -90,22 +92,23 @@ async def gpt_answer(message: Message, state: FSMContext, bot: Bot):
         #создание истории json если ее нет и забирание того что там
         with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='r', encoding='utf-8') as file:
             if file.readline() == "":
-                history = []
+                history = [] # если истории нет то создаем
             else:
                 file.seek(0)
                 history = json.load(file)
         typing_task = asyncio.create_task(send_typing_action(message.from_user.id, bot))
         print(f"Изначальная история: {history}")
-        epoch = get_epoch()
+        epoch = int(time.time())
         history.append({"role":"user", "content": message.text, "content_type":"text", "epoch":epoch})
-
+        print(f"История с запросом: {history}")
         try:
-            response = await coze_request(str(message.from_user.id), message.text, history)
+            conversation_id = await rq.get_conv_id(tg_id=message.from_user.id)
+            response = await coze_request(str(message.from_user.id), message.text, history, conversation_id)
             if 'role' in response and 'type' in response and 'content' in response:
-                epoch = get_epoch()
-                response['epoch'] = epoch
-                history.append(response)
-                print(f"История с ответом: {history}")
+                epoch = int(time.time())
+                history.append({"role":"bot", "content":response['content'], "content_type":"text", "epoch":epoch})
+                print(f"История с ответом: {history}"
+                      f"conversation_id: {conversation_id}")
                 with open(file=f"./bot/database/histories/{str(message.from_user.id)}.json", mode='w',
                           encoding='utf-8') as file:
                     json.dump(history, file, ensure_ascii=False, indent=4)

@@ -7,14 +7,15 @@ from bot.utils.config import COZE_URL as url, COZE_TOKEN as token, COZE_BOT_ID a
 
 #coze взаимодействия
 # все делается асинхронно чтобы не втыкали
-async def coze_request(tg_id, query, history):
+async def coze_request(tg_id, query, history, conversation_id):
     async with aiohttp.ClientSession() as session:
         headers = {'Authorization': f"Bearer {token}",
                    'Content-Type': 'application/json',
                    'Accept': '*/*',
                    'Host':'api.coze.com',
                    'Connection':'keep-alive'}
-        data = {'bot_id': str(coze_id), #'conversation_id':'',
+        data = {'bot_id': str(coze_id),
+                'conversation_id':str(conversation_id),
                 'user': str(tg_id),
                 'query': query,
                 'stream': False,

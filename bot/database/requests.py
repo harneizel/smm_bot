@@ -1,7 +1,7 @@
 from sqlalchemy import select, update, delete, insert
 from sqlalchemy.exc import SQLAlchemyError
 
-from bot.database.models import async_session, User
+from bot.database.models import async_session, User, Sessions
 
 # добавление юзера в бд
 async def add_user(tg_id: int, name, username):
@@ -109,7 +109,7 @@ async def reset_to_zero_requests():
             await session.execute(update(User).where(User.tg_id == tg_id).values(rq_made=0))
         await session.commit()
 
-
+# забирает теги и описание юзера из бд (для web app)
 async def get_user_data(tg_id: int):
     async with async_session() as session:
         user = (await session.execute(
@@ -117,3 +117,18 @@ async def get_user_data(tg_id: int):
                 User.tg_id == tg_id))).first()
         print(user)
         return user
+
+# забирает, увеличивает и записывает conversation_id в бд, идентификатор для диалога
+async def conv_id(tg_id):
+    async with async_session() as session:
+        conversation_id = int(await session.scalar(select(Sessions.conversation_id).where(Sessions.id == 1)))
+        await session.execute(update(Sessions).where(Sessions.id == 1).values(conversation_id=conversation_id+1))
+        await session.commit()
+        await session.execute(update(User).where(User.tg_id == tg_id).values(conversation_id=conversation_id))
+        await session.commit()
+
+# забирает conversation_id
+async def get_conv_id(tg_id):
+    async with async_session() as session:
+        conversation_id = await session.scalar(select(Sessions.conversation_id).where(Sessions.id == 1))
+        return conversation_id
