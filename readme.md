@@ -6,4 +6,4 @@
 2. Установить зависимости из requirements.txt
 3. Переименовать файл config_example.yml в config.yml, и заполнить в нем все данные
 4. Запустить main.py
-5. Запустить server.py 
+5. Запустить server.py

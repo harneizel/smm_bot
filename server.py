@@ -1,9 +1,8 @@
-from flask import Flask, request
 import hashlib
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 import asyncio
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Body
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -13,29 +12,32 @@ from bot.database import requests as rq
 app = FastAPI()
 
 # Настройка CORS
+'''
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Разрешить все источники, можно указать конкретные домены
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
+)'''
 
 # Mount the static directory
 app.mount("/js", StaticFiles(directory="web-app/js"), name="js")
 
-# получение данных платежки для подтверждения
-@app.get('/get-payment')
-async def get_payment():
+# получение данных платежки для подтвержденияS
+@app.post('/get-payment')
+async def get_payment(request: Request):
+    #data = await request.json()
+    # argument = data.get("argument")
     print("get payment получен")
-    OutSum: str = request.form.get('OutSum')  # сумма платежа
-    InvId: int = request.form.get('InvId')  # id клиента
-    Fee = request.form.get('Fee')  # комиссия
-    EMail = request.form.get('Email')  # email указанный при оплате
-    SignatureValue = request.form.get('SignatureValue')  # полученная контрольная сумма
-    PaymentMethod = request.form.get('PaymentMethod')  # метод платежа
-    IncCurrLabel = request.form.get('IncCurrLabel')  # валюта платежа
-    Id = request.form.get('Shp_id')  # tg_id клиента
+    OutSum = request.query_params['OutSum']  # сумма платежа
+    InvId = request.query_params['InvId']  # id клиента
+    Fee = request.query_params['Fee']  # комиссия
+    EMail = request.query_params['Email']  # email указанный при оплате
+    SignatureValue = request.query_params['SignatureValue']  # полученная контрольная сумма
+    PaymentMethod = request.query_params['PaymentMethod']  # метод платежа
+    IncCurrLabel = request.query_params['IncCurrLabel']  # валюта платежа
+    Id = request.query_params['Shp_id']  # tg_id клиента
     print(OutSum, InvId, Fee, EMail, SignatureValue, PaymentMethod, IncCurrLabel, Id)
     pass_2 = PASS_2
     SignatureIntended = hashlib.md5(f"{OutSum}:{InvId}:{pass_2}:Shp_id={Id}".encode('utf-8')).hexdigest()  # предполагаемая подпись
@@ -46,6 +48,30 @@ async def get_payment():
         asyncio.run(rq.sub_type_paid(int(Id)))
         return f"OK{InvId}"
     print("подписи не совпали")
+    
+'''
+@app.post('/get-payment')
+async def get_payment(data = Body()):
+    print("get payment получен")
+    OutSum = int(data['OutSum'])  # сумма платежа
+    InvId = int(data['InvId'])  # id клиента
+    Fee = data['Fee']  # комиссия
+    EMail = data['Email']  # email указанный при оплате
+    SignatureValue = data['SignatureValue']  # полученная контрольная сумма
+    PaymentMethod = data['PaymentMethod']  # метод платежа
+    IncCurrLabel = data['IncCurrLabel']  # валюта платежа
+    Id = int(data['Shp_id'])  # tg_id клиента
+    print(OutSum, InvId, Fee, EMail, SignatureValue, PaymentMethod, IncCurrLabel, Id)
+    pass_2 = PASS_2
+    SignatureIntended = hashlib.md5(f"{OutSum}:{InvId}:{pass_2}:Shp_id={Id}".encode('utf-8')).hexdigest()  # предполагаемая подпись
+    SignatureIntended = SignatureIntended.upper()
+    print(SignatureValue, SignatureIntended)
+    if SignatureIntended == SignatureValue:
+        print(f"ПОДПИСИ СОВПАЛИ, ID: {Id}")
+        asyncio.run(rq.sub_type_paid(int(Id)))
+        return f"OK{InvId}"
+    print("подписи не совпали")
+'''
 
 # главная страница web app
 @app.get('/app')
@@ -83,6 +109,6 @@ async def user_info(user_id: int):
 # Запуск сервера с HTTPS
 if __name__ == "__main__":
     try:
-        uvicorn.run(app, host="0.0.0.0", port=443, ssl_keyfile="web-app/ssl/YOURPRIVATE.key", ssl_certfile="web-app/ssl/YOURPUBLIC.pem")
+        uvicorn.run(app, host="0.0.0.0", port=443)#, ssl_keyfile="web-app/ssl/YOURPRIVATE.key", ssl_certfile="web-app/ssl/YOURPUBLIC.pem")
     except:
         print("Ошибка")
